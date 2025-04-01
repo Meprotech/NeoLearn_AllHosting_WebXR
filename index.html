@@ -1,129 +1,63 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Space Scene</title>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity WebGL Player</title>
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            margin: 0;
-            overflow: hidden;
-        }
-        #webgl-container {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-        #unity-canvas {
-            width: 100%;
-            height: 100%;
-        }
-        #webgl-loading-bar {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50%;
-        }
-        #unity-logo {
-            width: 20%;
-            height: 60px;
-            background: url('space/TemplateData/unity-logo-dark.png') no-repeat center;
-            background-size: contain;
-            display: inline-block;
-        }
-        #unity-progress-bar-empty {
-            width: 60%;
-            height: 10px;
-            background: grey;
-            display: inline-block;
-        }
-        #unity-progress-bar-full {
-            width: 0%;
-            height: 10px;
-            background: green;
-            display: inline-block;
-        }
-        #unity-warning {
-            position: absolute;
-            top: 10px;
-            background: #f00;
-            color: white;
-            padding: 10px;
-            display: none;
-        }
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+      }
     </style>
-</head>
-<body>
-    <h1>Space Scene</h1>
-    <label for="audioUrlInput">Audio URL:</label>
-    <input type="text" id="audioUrlInput">
-    <button onclick="loadSpaceScene()">Load Space Scene</button>
-
-    <div id="webgl-container">
-        <canvas id="unity-canvas"></canvas>
-        <div id="webgl-loading-bar">
-            <div id="unity-logo"></div>
-            <div id="unity-progress-bar-empty">
-                <div id="unity-progress-bar-full"></div>
-            </div>
-        </div>
-        <div id="unity-warning"> </div>
+  </head>
+  <body>
+    <!-- Unity WebGL container -->
+    <div id="unity-container">
+      <canvas id="unity-canvas"></canvas>
     </div>
 
+    <!-- JavaScript to load Unity WebGL -->
     <script>
-        function loadSpaceScene() {
-            const container = document.getElementById('webgl-container');
-            const canvas = document.getElementById('unity-canvas');
-            const loadingBar = document.getElementById('webgl-loading-bar');
-            const progressBarFull = document.getElementById('unity-progress-bar-full');
-            const warningBanner = document.getElementById('unity-warning');
-            const audioUrl = document.getElementById('audioUrlInput').value;
+      // Path to your Unity WebGL build directory
+      var buildUrl = "space/Build"; // Update this to your custom directory
 
-            container.style.display = 'block';
-            loadingBar.style.display = 'block';
-            warningBanner.style.display = 'none';
+      var loaderUrl = buildUrl + "/space.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/space.data",
+        frameworkUrl: buildUrl + "/space.framework.js",
+        codeUrl: buildUrl + "/space.wasm",
+        streamingAssetsUrl: buildUrl + "space/StreamingAssets",
+        companyName: "YourCompanyName",
+        productName: "YourProductName",
+        productVersion: "1.0.0"
+      };
 
-            const script = document.createElement('script');
-            script.src = 'space/Build/space.loader.js';
+      var canvas = document.querySelector("#unity-canvas");
+      var script = document.createElement("script");
 
-            script.onload = () => {
-                createUnityInstance(canvas, {
-                    dataUrl: 'space/Build/space.data',
-                    frameworkUrl: 'space/Build/space.framework.js',
-                    codeUrl: 'space/Build/space.wasm',
-                    symbolsUrl: 'space/Build/space.symbols.json', // Add if you have symbols
-                }, (progress) => {
-                    progressBarFull.style.transform = `scaleX(${progress})`;
-                }).then((instance) => {
-                    loadingBar.style.display = 'none';
-                    instance.SendMessage("AudioDownloaderGameObject", "SetAudioUrl", audioUrl);
-                    requestFullscreen(container);
-                }).catch((message) => {
-                    warningBanner.style.display = 'block';
-                    warningBanner.innerText = message;
-                    loadingBar.style.display = 'none';
-                });
-            };
-
-            document.body.appendChild(script);
-        }
-
-        function requestFullscreen(element) {
-            if (element.requestFullscreen) {
-                element.requestFullscreen();
-            } else if (element.mozRequestFullScreen) {
-                element.mozRequestFullScreen();
-            } else if (element.webkitRequestFullscreen) {
-                element.webkitRequestFullscreen();
-            } else if (element.msRequestFullscreen) {
-                element.msRequestFullscreen();
-            }
-        }
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          console.log("Loading progress:", progress * 100 + "%");
+        }).then((instance) => {
+          console.log("Unity instance loaded successfully.");
+        }).catch((message) => {
+          console.error("Failed to load Unity instance:", message);
+        });
+      };
+      document.body.appendChild(script);
     </script>
-</body>
+  </body>
 </html>
