@@ -31,14 +31,14 @@
     <!-- JavaScript to load Unity WebGL -->
     <script>
       // Path to your Unity WebGL build directory
-      var buildUrl = "space/Build"; // Update this to your custom directory
+      var buildUrl = "space"; // Update this to your custom directory
 
-      var loaderUrl = buildUrl + "/space.loader.js";
+      var loaderUrl = buildUrl + "/Build/space.loader.js";
       var config = {
-        dataUrl: buildUrl + "/space.data",
-        frameworkUrl: buildUrl + "/space.framework.js",
-        codeUrl: buildUrl + "/space.wasm",
-        streamingAssetsUrl: "space/StreamingAssets",
+        dataUrl: buildUrl + "/Build/WebGL.data",
+        frameworkUrl: buildUrl + "/Build/WebGL.framework.js",
+        codeUrl: buildUrl + "/Build/WebGL.wasm",
+        streamingAssetsUrl: buildUrl + "/StreamingAssets",
         companyName: "YourCompanyName",
         productName: "YourProductName",
         productVersion: "1.0.0"
