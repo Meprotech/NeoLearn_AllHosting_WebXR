@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Space and Heart Scenes</title>
+    <title>Space Scene</title>
     <style>
         body {
             font-family: sans-serif;
             text-align: center;
-            margin: 0; /* Remove default body margin */
-            overflow: hidden; /* Hide scrollbars */
+            margin: 0;
+            overflow: hidden;
         }
         #webgl-container {
-            width: 100vw; /* Full viewport width */
-            height: 100vh; /* Full viewport height */
-            display: none;
-            position: fixed; /* Fixed position to cover entire screen */
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
             top: 0;
             left: 0;
-            z-index: 1000; /* Ensure it's on top */
+            z-index: 1000;
         }
         #unity-canvas {
             width: 100%;
@@ -60,12 +59,10 @@
     </style>
 </head>
 <body>
-    <h1>Select a Scene</h1>
+    <h1>Space Scene</h1>
     <label for="audioUrlInput">Audio URL:</label>
     <input type="text" id="audioUrlInput">
-
-    <button onclick="loadBuild('space')">Space Scene</button>
-    <button onclick="loadBuild('heart')">Heart Scene</button>
+    <button onclick="loadSpaceScene()">Load Space Scene</button>
 
     <div id="webgl-container">
         <canvas id="unity-canvas"></canvas>
@@ -79,47 +76,33 @@
     </div>
 
     <script>
-        let unityInstance = null;
-        let currentBuild = null;
-
-        function loadBuild(buildName) {
-            currentBuild = buildName;
-
-            if (unityInstance !== null) {
-                unityInstance.Quit();
-                unityInstance = null;
-            }
-
+        function loadSpaceScene() {
             const container = document.getElementById('webgl-container');
             const canvas = document.getElementById('unity-canvas');
             const loadingBar = document.getElementById('webgl-loading-bar');
             const progressBarFull = document.getElementById('unity-progress-bar-full');
             const warningBanner = document.getElementById('unity-warning');
             const audioUrl = document.getElementById('audioUrlInput').value;
-            const logo = document.getElementById('unity-logo');
-
-            logo.style.backgroundImage = `url('${buildName}/TemplateData/unity-logo-dark.png')`;
 
             container.style.display = 'block';
             loadingBar.style.display = 'block';
             warningBanner.style.display = 'none';
 
             const script = document.createElement('script');
-            script.src = `${buildName}/Build/${buildName}.loader.js`;
+            script.src = 'space/Build/space.loader.js';
 
             script.onload = () => {
                 createUnityInstance(canvas, {
-                    dataUrl: `${buildName}/Build/${buildName}.data`,
-                    frameworkUrl: `${buildName}/Build/${buildName}.framework.js`,
-                    codeUrl: `${buildName}/Build/${buildName}.wasm`,
-                    symbolsUrl: `${buildName}/Build/${buildName}.symbols.json`,
+                    dataUrl: 'space/Build/space.data',
+                    frameworkUrl: 'space/Build/space.framework.js',
+                    codeUrl: 'space/Build/space.wasm',
+                    symbolsUrl: 'space/Build/space.symbols.json', // Add if you have symbols
                 }, (progress) => {
                     progressBarFull.style.transform = `scaleX(${progress})`;
                 }).then((instance) => {
-                    unityInstance = instance;
                     loadingBar.style.display = 'none';
-                    unityInstance.SendMessage("AudioDownloaderGameObject", "SetAudioUrl", audioUrl);
-                    requestFullscreen(container); // Trigger fullscreen
+                    instance.SendMessage("AudioDownloaderGameObject", "SetAudioUrl", audioUrl);
+                    requestFullscreen(container);
                 }).catch((message) => {
                     warningBanner.style.display = 'block';
                     warningBanner.innerText = message;
