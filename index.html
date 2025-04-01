@@ -6,12 +6,21 @@
         body {
             font-family: sans-serif;
             text-align: center;
+            margin: 0; /* Remove default body margin */
+            overflow: hidden; /* Hide scrollbars */
         }
         #webgl-container {
-            width: 960px;
-            height: 600px;
+            width: 100vw; /* Full viewport width */
+            height: 100vh; /* Full viewport height */
             display: none;
-            margin: 20px auto;
+            position: fixed; /* Fixed position to cover entire screen */
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Ensure it's on top */
+        }
+        #unity-canvas {
+            width: 100%;
+            height: 100%;
         }
         #webgl-loading-bar {
             display: none;
@@ -24,7 +33,7 @@
         #unity-logo {
             width: 20%;
             height: 60px;
-            background: url('space/TemplateData/unity-logo-dark.png') no-repeat center; /* Default to space logo */
+            background: url('space/TemplateData/unity-logo-dark.png') no-repeat center;
             background-size: contain;
             display: inline-block;
         }
@@ -59,7 +68,7 @@
     <button onclick="loadBuild('heart')">Heart Scene</button>
 
     <div id="webgl-container">
-        <canvas id="unity-canvas" width=960 height=600 style="width: 960px; height: 600px; background: #231F20"></canvas>
+        <canvas id="unity-canvas"></canvas>
         <div id="webgl-loading-bar">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
@@ -89,7 +98,7 @@
             const audioUrl = document.getElementById('audioUrlInput').value;
             const logo = document.getElementById('unity-logo');
 
-            logo.style.backgroundImage = `url('${buildName}/TemplateData/unity-logo-dark.png')`; // Update logo
+            logo.style.backgroundImage = `url('${buildName}/TemplateData/unity-logo-dark.png')`;
 
             container.style.display = 'block';
             loadingBar.style.display = 'block';
@@ -103,13 +112,14 @@
                     dataUrl: `${buildName}/Build/${buildName}.data`,
                     frameworkUrl: `${buildName}/Build/${buildName}.framework.js`,
                     codeUrl: `${buildName}/Build/${buildName}.wasm`,
-                    symbolsUrl: `${buildName}/Build/${buildName}.symbols.json`, // Add if you have symbols
+                    symbolsUrl: `${buildName}/Build/${buildName}.symbols.json`,
                 }, (progress) => {
                     progressBarFull.style.transform = `scaleX(${progress})`;
                 }).then((instance) => {
                     unityInstance = instance;
                     loadingBar.style.display = 'none';
                     unityInstance.SendMessage("AudioDownloaderGameObject", "SetAudioUrl", audioUrl);
+                    requestFullscreen(container); // Trigger fullscreen
                 }).catch((message) => {
                     warningBanner.style.display = 'block';
                     warningBanner.innerText = message;
@@ -118,6 +128,18 @@
             };
 
             document.body.appendChild(script);
+        }
+
+        function requestFullscreen(element) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
         }
     </script>
 </body>
