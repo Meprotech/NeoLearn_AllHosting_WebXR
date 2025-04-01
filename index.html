@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Space and Heart Scenes</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+        }
+        #webgl-container {
+            width: 960px;
+            height: 600px;
+            display: none;
+            margin: 20px auto;
+        }
+        #webgl-loading-bar {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+        }
+        #unity-logo {
+            width: 20%;
+            height: 60px;
+            background: url('space/TemplateData/unity-logo-dark.png') no-repeat center; /* Default to space logo */
+            background-size: contain;
+            display: inline-block;
+        }
+        #unity-progress-bar-empty {
+            width: 60%;
+            height: 10px;
+            background: grey;
+            display: inline-block;
+        }
+        #unity-progress-bar-full {
+            width: 0%;
+            height: 10px;
+            background: green;
+            display: inline-block;
+        }
+        #unity-warning {
+            position: absolute;
+            top: 10px;
+            background: #f00;
+            color: white;
+            padding: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select a Scene</h1>
+    <label for="audioUrlInput">Audio URL:</label>
+    <input type="text" id="audioUrlInput">
+
+    <button onclick="loadBuild('space')">Space Scene</button>
+    <button onclick="loadBuild('heart')">Heart Scene</button>
+
+    <div id="webgl-container">
+        <canvas id="unity-canvas" width=960 height=600 style="width: 960px; height: 600px; background: #231F20"></canvas>
+        <div id="webgl-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
+            </div>
+        </div>
+        <div id="unity-warning"> </div>
+    </div>
+
+    <script>
+        let unityInstance = null;
+        let currentBuild = null;
+
+        function loadBuild(buildName) {
+            currentBuild = buildName;
+
+            if (unityInstance !== null) {
+                unityInstance.Quit();
+                unityInstance = null;
+            }
+
+            const container = document.getElementById('webgl-container');
+            const canvas = document.getElementById('unity-canvas');
+            const loadingBar = document.getElementById('webgl-loading-bar');
+            const progressBarFull = document.getElementById('unity-progress-bar-full');
+            const warningBanner = document.getElementById('unity-warning');
+            const audioUrl = document.getElementById('audioUrlInput').value;
+            const logo = document.getElementById('unity-logo');
+
+            logo.style.backgroundImage = `url('${buildName}/TemplateData/unity-logo-dark.png')`; // Update logo
+
+            container.style.display = 'block';
+            loadingBar.style.display = 'block';
+            warningBanner.style.display = 'none';
+
+            const script = document.createElement('script');
+            script.src = `${buildName}/Build/${buildName}.loader.js`;
+
+            script.onload = () => {
+                createUnityInstance(canvas, {
+                    dataUrl: `${buildName}/Build/${buildName}.data`,
+                    frameworkUrl: `${buildName}/Build/${buildName}.framework.js`,
+                    codeUrl: `${buildName}/Build/${buildName}.wasm`,
+                    symbolsUrl: `${buildName}/Build/${buildName}.symbols.json`, // Add if you have symbols
+                }, (progress) => {
+                    progressBarFull.style.transform = `scaleX(${progress})`;
+                }).then((instance) => {
+                    unityInstance = instance;
+                    loadingBar.style.display = 'none';
+                    unityInstance.SendMessage("AudioDownloaderGameObject", "SetAudioUrl", audioUrl);
+                }).catch((message) => {
+                    warningBanner.style.display = 'block';
+                    warningBanner.innerText = message;
+                    loadingBar.style.display = 'none';
+                });
+            };
+
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>
