@@ -17,14 +17,12 @@
       line-height: 1.6;
     }
     
-    /* Main interface styling */
     .main-interface {
       width: 100%;
       max-width: 1200px;
       padding: 20px;
     }
     
-    /* Unity container styling */
     #unity-container {
       position: fixed;
       top: 0;
@@ -36,7 +34,6 @@
       display: none;
     }
     
-    /* Loading screen styling */
     #unity-loading-bar {
       position: absolute;
       left: 50%;
@@ -45,8 +42,7 @@
       text-align: center;
     }
     
-    /* Keep your existing styles for buttons/input */
-    /* ... (include all previous CSS styles) ... */
+    /* Keep other existing styles */
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -97,65 +93,65 @@
 
     function loadUnityProject(project) {
       currentProject = project;
-      // Show Unity container and hide main interface
       document.getElementById('unity-container').style.display = 'block';
       document.querySelector('.main-interface').style.display = 'none';
-      
-      // Load Unity build
       initializeUnityBuild(project);
     }
 
     function initializeUnityBuild(project) {
-  const buildPath = `Build/${project}/`;
-  const config = {
-    dataUrl: `${buildPath}WebGL.data`,
-    frameworkUrl: `${buildPath}WebGL.framework.js`,
-    codeUrl: `${buildPath}WebGL.wasm`,
-    streamingAssetsUrl: `${buildPath}StreamingAssets`, // Fixed template literal
-    companyName: "NeoLearn",
-    productName: project,
-    productVersion: "1.0",
-  };
+      const buildPath = `Build/${project}/`;
+      const config = {
+        dataUrl: `${buildPath}WebGL.data`,
+        frameworkUrl: `${buildPath}WebGL.framework.js`,
+        codeUrl: `${buildPath}WebGL.wasm`,
+        streamingAssetsUrl: `${buildPath}StreamingAssets`,
+        companyName: "NeoLearn",
+        productName: project,
+        productVersion: "1.0",
+      };
 
       const canvas = document.querySelector("#unity-canvas");
       const loadingBar = document.querySelector("#unity-loading-bar");
       loadingBar.style.display = "block";
 
-      // Clear previous Unity instance
+      // Clear previous instance
       if(currentUnityInstance) {
-        currentUnityInstance.Quit();
-        currentUnityInstance = null;
+        currentUnityInstance.Quit().then(() => {
+          currentUnityInstance = null;
+          loadNewInstance();
+        });
+      } else {
+        loadNewInstance();
       }
 
-      // Load Unity loader
-      const script = document.createElement("script");
-      script.src = `${buildPath}WebGL.loader.js`;
-      
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.getElementById("unity-progress-bar-full").style.width = 
-            `${Math.min(100 * progress, 100)}%`;
-        }).then((instance) => {
-          currentUnityInstance = instance;
-          loadingBar.style.display = "none";
-          
-          // Pass audio URL to Unity
-          const audioUrl = audioUrlInput.value;
-          if(audioUrl) {
-            currentUnityInstance.SendMessage('AudioManager', 'PlayAudio', audioUrl);
-          }
-        }).catch((error) => {
-          console.error('Unity initialization failed:', error);
-          alert(`Error loading ${project} experience`);
-        });
-      };
+      function loadNewInstance() {
+        const script = document.createElement("script");
+        script.src = `${buildPath}WebGL.loader.js`;
+        
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            document.getElementById("unity-progress-bar-full").style.width = 
+              `${Math.min(100 * progress, 100)}%`;
+          }).then((instance) => {
+            currentUnityInstance = instance;
+            loadingBar.style.display = "none";
+            
+            const audioUrl = audioUrlInput.value;
+            if(audioUrl) {
+              currentUnityInstance.SendMessage('AudioManager', 'PlayAudio', audioUrl);
+            }
+          }).catch(handleError);
+        };
 
-      script.onerror = () => {
-        alert(`Failed to load ${project} build files!`);
+        script.onerror = handleError;
+        document.body.appendChild(script);
+      }
+
+      function handleError(error) {
+        console.error('Loading failed:', error);
+        alert(`Failed to load ${project} build!`);
         returnToMainInterface();
-      };
-
-      document.body.appendChild(script);
+      }
     }
 
     function returnToMainInterface() {
@@ -175,7 +171,6 @@
         'No audio URL provided';
     }
 
-    // Handle window resize
     window.addEventListener('resize', () => {
       if(currentUnityInstance) {
         currentUnityInstance.SetFullscreen(0);
