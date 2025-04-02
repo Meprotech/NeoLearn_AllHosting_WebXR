@@ -129,7 +129,7 @@
 
       // Load Unity loader
       const script = document.createElement("script");
-      script.src = `${buildPath}${project}.loader.js`;
+      script.src = `${buildPath}WebGL.loader.js`;
       
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
