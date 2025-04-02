@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeoLearn Experience</title>
   <style>
-    /* Combined CSS styles */
-    body { 
+    /* Combined CSS Styles */
+    body {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -15,8 +15,34 @@
       font-family: 'Montserrat', sans-serif;
       color: #333;
       line-height: 1.6;
+      padding: 20px;
     }
-    .main-interface { width: 100%; max-width: 1200px; padding: 20px; }
+
+    .header-logo {
+      width: 100%;
+      max-height: 250px;
+      object-fit: cover;
+      display: block;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid #ddd;
+    }
+
+    .branding {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 40px;
+    }
+
+    .main-container {
+      display: flex;
+      width: 90%;
+      max-width: 1100px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
     #unity-container {
       position: fixed;
       top: 0;
@@ -27,14 +53,8 @@
       z-index: 1000;
       display: none;
     }
-    #unity-loading-bar {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-    /* Add other styles from previous versions */
+
+    /* Add all other styles from both files */
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -85,11 +105,6 @@
       currentProject = project;
       showUnityContainer();
       initializeUnityBuild(project);
-    }
-
-    function showUnityContainer() {
-      document.getElementById('unity-container').style.display = 'block';
-      document.querySelector('.main-interface').style.display = 'none';
     }
 
     function initializeUnityBuild(project) {
@@ -150,12 +165,6 @@
       }
     }
 
-    function handleError(error) {
-      console.error('Error:', error);
-      alert(`Failed to load ${currentProject} experience`);
-      returnToMainInterface();
-    }
-
     function returnToMainInterface() {
       cleanupPreviousInstance(() => {
         document.getElementById('unity-container').style.display = 'none';
@@ -169,6 +178,12 @@
       displayArea.textContent = audioUrlInput.value ?
         `Audio Source: ${audioUrlInput.value}` : 
         'No audio URL provided';
+    }
+
+    function handleError(error) {
+      console.error('Error:', error);
+      alert(`Failed to load ${currentProject} experience`);
+      returnToMainInterface();
     }
 
     window.addEventListener('resize', () => {
