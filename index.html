@@ -368,6 +368,7 @@
       const audioUrl = audioUrlInput.value;
       if (audioUrl) {
         // This calls a C# method named "PlayAudio" on a GameObject named "AudioManager"
+      script.onerror = () => handleError({audioUrl});
         currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
       }
     }
