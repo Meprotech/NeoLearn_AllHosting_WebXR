@@ -106,16 +106,16 @@
     }
 
     function initializeUnityBuild(project) {
-      const buildPath = `Build/${project}/`;
-      const config = {
-        dataUrl: `${buildPath}${project}.data`,
-        frameworkUrl: `${buildPath}${project}.framework.js`,
-        codeUrl: `${buildPath}${project}.wasm`,
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "NeoLearn",
-        productName: project,
-        productVersion: "1.0",
-      };
+  const buildPath = `Build/${project}/`;
+  const config = {
+    dataUrl: `${buildPath}WebGL.data`,
+    frameworkUrl: `${buildPath}WebGL.framework.js`,
+    codeUrl: `${buildPath}WebGL.wasm`,
+    streamingAssetsUrl: `${buildPath}StreamingAssets`, // Fixed template literal
+    companyName: "NeoLearn",
+    productName: project,
+    productVersion: "1.0",
+  };
 
       const canvas = document.querySelector("#unity-canvas");
       const loadingBar = document.querySelector("#unity-loading-bar");
