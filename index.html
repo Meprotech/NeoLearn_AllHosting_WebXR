@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeoLearn Experience</title>
   <style>
-    /* Combined CSS from both files */
+    /* Combined CSS */
     body {
       display: flex;
       flex-direction: column;
@@ -15,40 +15,63 @@
       font-family: 'Montserrat', sans-serif;
       color: #333;
       line-height: 1.6;
+    }
+    
+    /* Main interface styling */
+    .main-interface {
+      width: 100%;
+      max-width: 1200px;
       padding: 20px;
     }
-    /* ... (keep all your existing styles) ... */
+    
+    /* Unity container styling */
     #unity-container {
-      display: none; /* Initially hidden */
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1000;
       background: white;
+      z-index: 1000;
+      display: none;
     }
+    
+    /* Loading screen styling */
+    #unity-loading-bar {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    
+    /* Keep your existing styles for buttons/input */
+    /* ... (include all previous CSS styles) ... */
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <img src="logo.png" alt="NeoLearn Header Logo" class="header-logo">
-
-  <div class="branding">
-    <h1>NeoLearn Experience</h1>
-    <p>Explore immersive learning environments and discover new ways to grow your knowledge with NeoLearn.</p>
-  </div>
-
-  <div class="main-container">
-    <div class="left-section">
-      <button class="scene-button" onclick="loadUnityProject('Space')">Space</button>
-      <button class="scene-button" onclick="loadUnityProject('Heart')">Heart</button>
+  <!-- Main Interface -->
+  <div class="main-interface">
+    <img src="logo.png" alt="NeoLearn Header Logo" class="header-logo">
+    
+    <div class="branding">
+      <h1>NeoLearn Experience</h1>
+      <p>Explore immersive learning environments with NeoLearn.</p>
     </div>
-    <div class="separator"></div>
-    <div class="right-section">
-      <input type="text" id="userInput" class="input-field" placeholder="Enter audio URL here">
-      <button class="scene-button" onclick="displayInput()">Display</button>
-      <div id="displayArea"></div>
+
+    <div class="main-container">
+      <div class="left-section">
+        <button class="scene-button" onclick="loadUnityProject('Space')">Space</button>
+        <button class="scene-button" onclick="loadUnityProject('Heart')">Heart</button>
+      </div>
+      <div class="separator"></div>
+      <div class="right-section">
+        <input type="text" id="userInput" class="input-field" 
+               placeholder="Enter audio URL (e.g., https://example.com/audio.wav)">
+        <button class="scene-button" onclick="displayInput()">Preview URL</button>
+        <div id="displayArea"></div>
+      </div>
     </div>
   </div>
 
@@ -63,68 +86,99 @@
         <div id="unity-progress-bar-full"></div>
       </div>
     </div>
+    <button id="return-button" class="scene-button" 
+            onclick="returnToMainInterface()">Return to Menu</button>
   </div>
 
   <script>
+    let currentUnityInstance = null;
     let currentProject = '';
-    let unityInstance = null;
+    const audioUrlInput = document.getElementById('userInput');
 
     function loadUnityProject(project) {
       currentProject = project;
+      // Show Unity container and hide main interface
       document.getElementById('unity-container').style.display = 'block';
-      document.querySelector('.main-container').style.display = 'none';
+      document.querySelector('.main-interface').style.display = 'none';
       
-      const audioUrl = document.getElementById('userInput').value;
-      initializeUnity(project, audioUrl);
+      // Load Unity build
+      initializeUnityBuild(project);
     }
 
-    function initializeUnity(project, audioUrl) {
-      const buildUrl = `Build/${project}`;
+    function initializeUnityBuild(project) {
+      const buildPath = `Build/${project}/`;
       const config = {
-        dataUrl: `${buildUrl}/{{{ DATA_FILENAME }}}`,
-        frameworkUrl: `${buildUrl}/{{{ FRAMEWORK_FILENAME }}}`,
-        codeUrl: `${buildUrl}/{{{ CODE_FILENAME }}}`,
+        dataUrl: `${buildPath}${project}.data`,
+        frameworkUrl: `${buildPath}${project}.framework.js`,
+        codeUrl: `${buildPath}${project}.wasm`,
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "{{{ COMPANY_NAME }}}",
-        productName: "{{{ PRODUCT_NAME }}}",
-        productVersion: "{{{ PRODUCT_VERSION }}}",
+        companyName: "NeoLearn",
+        productName: project,
+        productVersion: "1.0",
       };
 
       const canvas = document.querySelector("#unity-canvas");
       const loadingBar = document.querySelector("#unity-loading-bar");
       loadingBar.style.display = "block";
 
+      // Clear previous Unity instance
+      if(currentUnityInstance) {
+        currentUnityInstance.Quit();
+        currentUnityInstance = null;
+      }
+
+      // Load Unity loader
       const script = document.createElement("script");
-      script.src = `${buildUrl}/{{{ LOADER_FILENAME }}}`;
+      script.src = `${buildPath}${project}.loader.js`;
       
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          document.getElementById("unity-progress-bar-full").style.width = 100 * progress + "%";
+          document.getElementById("unity-progress-bar-full").style.width = 
+            `${Math.min(100 * progress, 100)}%`;
         }).then((instance) => {
-          unityInstance = instance;
+          currentUnityInstance = instance;
           loadingBar.style.display = "none";
           
+          // Pass audio URL to Unity
+          const audioUrl = audioUrlInput.value;
           if(audioUrl) {
-            unityInstance.SendMessage('AudioManager', 'PlayAudio', audioUrl);
+            currentUnityInstance.SendMessage('AudioManager', 'PlayAudio', audioUrl);
           }
-        }).catch((message) => {
-          console.error(message);
-          alert("Error loading project");
+        }).catch((error) => {
+          console.error('Unity initialization failed:', error);
+          alert(`Error loading ${project} experience`);
         });
       };
-      
+
+      script.onerror = () => {
+        alert(`Failed to load ${project} build files!`);
+        returnToMainInterface();
+      };
+
       document.body.appendChild(script);
     }
 
-    function displayInput() {
-      const inputValue = document.getElementById('userInput').value;
-      document.getElementById('displayArea').textContent = "You entered: " + inputValue;
+    function returnToMainInterface() {
+      if(currentUnityInstance) {
+        currentUnityInstance.Quit();
+        currentUnityInstance = null;
+      }
+      document.getElementById('unity-container').style.display = 'none';
+      document.querySelector('.main-interface').style.display = 'block';
+      document.getElementById("unity-progress-bar-full").style.width = '0%';
     }
 
-    // Add window resize handler
+    function displayInput() {
+      const displayArea = document.getElementById('displayArea');
+      displayArea.textContent = audioUrlInput.value ?
+        `Audio Source: ${audioUrlInput.value}` : 
+        'No audio URL provided';
+    }
+
+    // Handle window resize
     window.addEventListener('resize', () => {
-      if(unityInstance) {
-        unityInstance.SetFullscreen(0);
+      if(currentUnityInstance) {
+        currentUnityInstance.SetFullscreen(0);
       }
     });
   </script>
