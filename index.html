@@ -1,64 +1,132 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unity WebGL Player</title>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-      #unity-container {
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-      #unity-canvas {
-        width: 100%;
-        height: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Unity WebGL container -->
-    <div id="unity-container">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeoLearn Experience</title>
+  <style>
+    /* Combined CSS from both files */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      background: linear-gradient(135deg, #f0f8ff, #e0f2fe);
+      font-family: 'Montserrat', sans-serif;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    /* ... (keep all your existing styles) ... */
+    #unity-container {
+      display: none; /* Initially hidden */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      background: white;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <img src="logo.png" alt="NeoLearn Header Logo" class="header-logo">
+
+  <div class="branding">
+    <h1>NeoLearn Experience</h1>
+    <p>Explore immersive learning environments and discover new ways to grow your knowledge with NeoLearn.</p>
+  </div>
+
+  <div class="main-container">
+    <div class="left-section">
+      <button class="scene-button" onclick="loadUnityProject('Space')">Space</button>
+      <button class="scene-button" onclick="loadUnityProject('Heart')">Heart</button>
+    </div>
+    <div class="separator"></div>
+    <div class="right-section">
+      <input type="text" id="userInput" class="input-field" placeholder="Enter audio URL here">
+      <button class="scene-button" onclick="displayInput()">Display</button>
+      <div id="displayArea"></div>
+    </div>
+  </div>
+
+  <!-- Unity Container -->
+  <div id="unity-container">
+    <div id="unity-canvas-container">
       <canvas id="unity-canvas"></canvas>
     </div>
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
+      </div>
+    </div>
+  </div>
 
-    <!-- JavaScript to load Unity WebGL -->
-    <script>
-      // Path to your Unity WebGL build directory
-      var buildUrl = "space"; // Update this to your custom directory
+  <script>
+    let currentProject = '';
+    let unityInstance = null;
 
-      var loaderUrl = buildUrl + "/Build/space.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/Build/WebGL.data",
-        frameworkUrl: buildUrl + "/Build/WebGL.framework.js",
-        codeUrl: buildUrl + "/Build/WebGL.wasm",
-        streamingAssetsUrl: buildUrl + "/StreamingAssets",
-        companyName: "YourCompanyName",
-        productName: "YourProductName",
-        productVersion: "1.0.0"
+    function loadUnityProject(project) {
+      currentProject = project;
+      document.getElementById('unity-container').style.display = 'block';
+      document.querySelector('.main-container').style.display = 'none';
+      
+      const audioUrl = document.getElementById('userInput').value;
+      initializeUnity(project, audioUrl);
+    }
+
+    function initializeUnity(project, audioUrl) {
+      const buildUrl = `Build/${project}`;
+      const config = {
+        dataUrl: `${buildUrl}/{{{ DATA_FILENAME }}}`,
+        frameworkUrl: `${buildUrl}/{{{ FRAMEWORK_FILENAME }}}`,
+        codeUrl: `${buildUrl}/{{{ CODE_FILENAME }}}`,
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "{{{ COMPANY_NAME }}}",
+        productName: "{{{ PRODUCT_NAME }}}",
+        productVersion: "{{{ PRODUCT_VERSION }}}",
       };
 
-      var canvas = document.querySelector("#unity-canvas");
-      var script = document.createElement("script");
+      const canvas = document.querySelector("#unity-canvas");
+      const loadingBar = document.querySelector("#unity-loading-bar");
+      loadingBar.style.display = "block";
 
-      script.src = loaderUrl;
+      const script = document.createElement("script");
+      script.src = `${buildUrl}/{{{ LOADER_FILENAME }}}`;
+      
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          if(unityInstance){unityInstance.SendMessage('AudioManager', 'PlayAudio', 'https://neolearn-asset.s3.ap-south-1.amazonaws.com/NeolearnChapterAudios/Life+in+Space.wav');}
-          console.log("Loading progress:", progress * 100 + "%");
+          document.getElementById("unity-progress-bar-full").style.width = 100 * progress + "%";
         }).then((instance) => {
-          console.log("Unity instance loaded successfully.");
+          unityInstance = instance;
+          loadingBar.style.display = "none";
+          
+          if(audioUrl) {
+            unityInstance.SendMessage('AudioManager', 'PlayAudio', audioUrl);
+          }
         }).catch((message) => {
-          console.error("Failed to load Unity instance:", message);
+          console.error(message);
+          alert("Error loading project");
         });
       };
+      
       document.body.appendChild(script);
-    </script>
-  </body>
+    }
+
+    function displayInput() {
+      const inputValue = document.getElementById('userInput').value;
+      document.getElementById('displayArea').textContent = "You entered: " + inputValue;
+    }
+
+    // Add window resize handler
+    window.addEventListener('resize', () => {
+      if(unityInstance) {
+        unityInstance.SetFullscreen(0);
+      }
+    });
+  </script>
+</body>
 </html>
