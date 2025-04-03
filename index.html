@@ -284,19 +284,28 @@
 
   function returnToMainInterface() {
     console.log("[UI] Returning to main interface");
-    
+
     cleanupPreviousInstance(() => {
         document.getElementById("unity-container").style.display = "none";
         document.querySelector(".main-interface").style.display = "block";
         document.getElementById("unity-progress-bar-full").style.width = "0%";
-    });
 
-    // Force full memory cleanup in WebGL
-    setTimeout(() => {
-        console.log("[Cleanup] Forcing WebGL memory cleanup");
-        window.location.reload(); // This ensures WebGL is fully cleared
-    }, 100); 
+        // Remove Unity Canvas to free WebGL memory
+        const unityCanvas = document.getElementById("unity-canvas");
+        if (unityCanvas) {
+            unityCanvas.remove();
+            console.log("[Cleanup] Unity canvas removed");
+        }
+
+        // Recreate a fresh Unity canvas for next session
+        const newCanvas = document.createElement("canvas");
+        newCanvas.id = "unity-canvas";
+        newCanvas.style.width = "100%";
+        newCanvas.style.height = "100%";
+        document.getElementById("unity-canvas-container").appendChild(newCanvas);
+    });
 }
+
 
 
   function displayInput() {
