@@ -245,14 +245,23 @@
       document.querySelector(".main-interface").style.display = "none";
     }
 
-    function returnToMainInterface() {
-      console.log("[UI] Returning to main interface");
-      cleanupPreviousInstance(() => {
-        document.getElementById("unity-container").style.display = "none";
-        document.querySelector(".main-interface").style.display = "block";
-        document.getElementById("unity-progress-bar-full").style.width = "0%";
-      });
-    }
+function returnToMainInterface() {
+  console.log("[UI] Returning to main interface");
+  cleanupPreviousInstance(() => {
+    // Remove and recreate canvas element
+    const canvasContainer = document.getElementById("unity-canvas-container");
+    canvasContainer.innerHTML = ""; // Clear previous canvas
+    const newCanvas = document.createElement("canvas");
+    newCanvas.id = "unity-canvas";
+    newCanvas.style.width = "100%";
+    newCanvas.style.height = "100%";
+    canvasContainer.appendChild(newCanvas);
+
+    document.getElementById("unity-container").style.display = "none";
+    document.querySelector(".main-interface").style.display = "block";
+    document.getElementById("unity-progress-bar-full").style.width = "0%";
+  });
+}
 
     function displayInput() {
       const displayArea = document.getElementById("displayArea");
@@ -264,51 +273,38 @@
     /* ==============================
        UNITY LOADING FUNCTIONS
     ============================== */
-    function initializeUnityBuild(project) {
-      console.log(`[Unity] Initializing build for: ${project}`);
-      const buildPath = `Build/${project}/`;
-      console.log(`[Path] Build path: ${buildPath}`);
+ function initializeUnityBuild(project) {
+  console.log(`[Unity] Initializing build for: ${project}`);
+  const buildPath = `Build/${project}/`;
+  const config = {
+    dataUrl: buildPath + "WebGL.data",
+    frameworkUrl: buildPath + "WebGL.framework.js",
+    codeUrl: buildPath + "WebGL.wasm",
+    streamingAssetsUrl: buildPath + "StreamingAssets",
+    companyName: "NeoLearn",
+    productName: project,
+    productVersion: "1.0",
+  };
 
-      const config = {
-        dataUrl: buildPath + "WebGL.data",
-        frameworkUrl: buildPath + "WebGL.framework.js",
-        codeUrl: buildPath + "WebGL.wasm",
-        streamingAssetsUrl: buildPath + "StreamingAssets",
-        companyName: "NeoLearn",
-        productName: project,
-        productVersion: "1.0",
-      };
+  console.log("[Config] Unity configuration:", config);
 
-      console.log("[Config] Unity configuration:", config);
 
-      const canvas = document.getElementById("unity-canvas");
-      const loadingBar = document.getElementById("unity-loading-bar");
+      // Recreate canvas element on each load
+  const canvasContainer = document.getElementById("unity-canvas-container");
+  canvasContainer.innerHTML = ""; // Clear any existing canvas
+  const canvas = document.createElement("canvas");
+  canvas.id = "unity-canvas";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvasContainer.appendChild(canvas);
 
-      cleanupPreviousInstance(() => {
-        console.log("[Cleanup] Previous instance cleared");
-        loadingBar.style.display = "block";
-        loadNewInstance(buildPath, config, canvas, loadingBar);
-      });
-    }
+  const loadingBar = document.getElementById("unity-loading-bar");
 
-    function cleanupPreviousInstance(callback) {
-      if (currentUnityInstance) {
-        console.log("[Cleanup] Quitting current instance");
-        currentUnityInstance.Quit()
-          .then(() => {
-            console.log("[Cleanup] Instance successfully destroyed");
-            currentUnityInstance = null;
-            callback();
-          })
-          .catch(error => {
-            console.error("[Cleanup] Error quitting instance:", error);
-            callback();
-          });
-      } else {
-        console.log("[Cleanup] No instance to clean up");
-        callback();
-      }
-    }
+  cleanupPreviousInstance(() => {
+    console.log("[Cleanup] Previous instance cleared");
+    loadingBar.style.display = "block";
+    loadNewInstance(buildPath, config, canvas, loadingBar);
+  });
 
     function loadNewInstance(buildPath, config, canvas, loadingBar) {
       console.log("[Loader] Starting new instance load");
