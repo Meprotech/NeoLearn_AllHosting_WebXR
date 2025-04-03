@@ -170,7 +170,6 @@
     }
     #unity-logo {
       margin-bottom: 10px;
-      /* If you have a custom logo, place it here */
     }
     #unity-progress-bar-empty {
       width: 250px;
@@ -259,132 +258,179 @@
     </button>
   </div>
 
-  <script>
-    /* ==============================
-       GLOBAL VARIABLES
-    ============================== */
-    let currentUnityInstance = null; // holds the active Unity instance
-    let currentProject = "";         // which project is currently loaded
-    const audioUrlInput = document.getElementById("userInput");
+ <script>
+  /* ==============================
+     GLOBAL VARIABLES
+  ============================== */
+  let currentUnityInstance = null;
+  let currentProject = "";
+  const audioUrlInput = document.getElementById("userInput");
 
-    /* ==============================
-       MAIN INTERFACE FUNCTIONS
-    ============================== */
-    function loadUnityProject(project) {
-      currentProject = project;
-      showUnityContainer();
-      initializeUnityBuild(project);
-    }
+  /* ==============================
+     MAIN INTERFACE FUNCTIONS
+  ============================== */
+  function loadUnityProject(project) {
+    console.log(`[Load] Starting load process for: ${project}`);
+    currentProject = project;
+    showUnityContainer();
+    initializeUnityBuild(project);
+  }
 
-    function showUnityContainer() {
-      // Show the Unity container, hide the main menu
-      document.getElementById("unity-container").style.display = "block";
-      document.querySelector(".main-interface").style.display = "none";
-    }
+  function showUnityContainer() {
+    console.log("[UI] Showing Unity container");
+    document.getElementById("unity-container").style.display = "block";
+    document.querySelector(".main-interface").style.display = "none";
+  }
 
-    function returnToMainInterface() {
-      // Unload Unity, then return to main menu
-      cleanupPreviousInstance(() => {
-        document.getElementById("unity-container").style.display = "none";
-        document.querySelector(".main-interface").style.display = "block";
-        document.getElementById("unity-progress-bar-full").style.width = "0%";
-      });
-    }
+  function returnToMainInterface() {
+    console.log("[UI] Returning to main interface");
+    cleanupPreviousInstance(() => {
+      document.getElementById("unity-container").style.display = "none";
+      document.querySelector(".main-interface").style.display = "block";
+      document.getElementById("unity-progress-bar-full").style.width = "0%";
+    });
+  }
 
-    function displayInput() {
-      const displayArea = document.getElementById("displayArea");
-      const value = audioUrlInput.value;
-      displayArea.textContent = value
-        ? "Audio Source: " + value
-        : "No audio URL provided";
-    }
+  function displayInput() {
+    const displayArea = document.getElementById("displayArea");
+    const value = audioUrlInput.value;
+    console.log(`[Input] Displaying audio URL: ${value || 'none'}`);
+    displayArea.textContent = value
+      ? "Audio Source: " + value
+      : "No audio URL provided";
+  }
 
-    /* ==============================
-       UNITY LOADING FUNCTIONS
-    ============================== */
-    function initializeUnityBuild(project) {
-      // Paths for the selected project
-      const buildPath = `Build/${project}/`;
+  /* ==============================
+     UNITY LOADING FUNCTIONS
+  ============================== */
+  function initializeUnityBuild(project) {
+    console.log(`[Unity] Initializing build for: ${project}`);
+    const buildPath = `Build/${project}/`;
+    console.log(`[Path] Build path: ${buildPath}`);
 
-      // Basic config for createUnityInstance
-      const config = {
-        dataUrl: buildPath + "WebGL.data",
-        frameworkUrl: buildPath + "WebGL.framework.js",
-        codeUrl: buildPath + "WebGL.wasm",
-        streamingAssetsUrl: buildPath + "StreamingAssets",
-        companyName: "NeoLearn",
-        productName: project,
-        productVersion: "1.0",
-      };
+    const config = {
+      dataUrl: buildPath + "WebGL.data",
+      frameworkUrl: buildPath + "WebGL.framework.js",
+      codeUrl: buildPath + "WebGL.wasm",
+      streamingAssetsUrl: buildPath + "StreamingAssets",
+      companyName: "NeoLearn",
+      productName: project,
+      productVersion: "1.0",
+    };
 
-      // Get references to HTML elements
-      const canvas = document.getElementById("unity-canvas");
-      const loadingBar = document.getElementById("unity-loading-bar");
+    console.log("[Config] Unity configuration:", config);
 
-      // First clean up any existing instance, then load the new one
-      cleanupPreviousInstance(() => {
-        loadingBar.style.display = "block";
-        loadNewInstance(buildPath, config, canvas, loadingBar);
-      });
-    }
+    const canvas = document.getElementById("unity-canvas");
+    const loadingBar = document.getElementById("unity-loading-bar");
 
-    function cleanupPreviousInstance(callback) {
-      if (currentUnityInstance) {
-        currentUnityInstance.Quit().then(() => {
+    cleanupPreviousInstance(() => {
+      console.log("[Cleanup] Previous instance cleared");
+      loadingBar.style.display = "block";
+      loadNewInstance(buildPath, config, canvas, loadingBar);
+    });
+  }
+
+  function cleanupPreviousInstance(callback) {
+    if (currentUnityInstance) {
+      console.log("[Cleanup] Quitting current instance");
+      currentUnityInstance.Quit()
+        .then(() => {
+          console.log("[Cleanup] Instance successfully destroyed");
           currentUnityInstance = null;
           callback();
+        })
+        .catch(error => {
+          console.error("[Cleanup] Error quitting instance:", error);
+          callback();
         });
-      } else {
-        callback();
-      }
+    } else {
+      console.log("[Cleanup] No instance to clean up");
+      callback();
     }
+  }
 
-    function loadNewInstance(buildPath, config, canvas, loadingBar) {
-      // Dynamically load the Unity loader script
-      const script = document.createElement("script");
-      script.src = buildPath + "WebGL.loader.js";
+  function loadNewInstance(buildPath, config, canvas, loadingBar) {
+    console.log("[Loader] Starting new instance load");
+    const script = document.createElement("script");
+    script.src = buildPath + "WebGL.loader.js";
+    console.log(`[Loader] Loading script from: ${script.src}`);
 
-      script.onload = () => {
-        // createUnityInstance is provided by the loader script
+    script.onload = () => {
+      console.log("[Loader] Script loaded successfully");
+      try {
         createUnityInstance(canvas, config, (progress) => {
+          // Removed loading progress log here
           document.getElementById("unity-progress-bar-full").style.width =
             `${Math.min(100 * progress, 100)}%`;
         })
-          .then((instance) => {
-            currentUnityInstance = instance;
-            loadingBar.style.display = "none";
-            handleAudioPlayback();
-          })
-          .catch((error) => {
-            handleError(error);
-          });
-      };
+        .then((instance) => {
+          console.log("[Unity] Instance created successfully");
+          currentUnityInstance = instance;
+          loadingBar.style.display = "none";
+          console.log("[Unity] Starting audio playback");
+          handleAudioPlayback();
+        })
+        .catch((error) => {
+          console.error("[Unity] Instance creation failed:", error);
+          handleError(error);
+        });
+      } catch (e) {
+        console.error("[Loader] Error in createUnityInstance:", e);
+        handleError(e);
+      }
+    };
 
-      script.onerror = () => handleError(`Failed to load ${currentProject} loader`);
-      document.body.appendChild(script);
-    }
+    script.onerror = (error) => {
+      console.error("[Loader] Script load failed:", {
+        src: script.src,
+        error: error.message
+      });
+      handleError({
+        message: `Failed to load ${currentProject} loader script`,
+        details: error
+      });
+    };
 
-    function handleAudioPlayback() {
-      const audioUrl = audioUrlInput.value;
-      if (audioUrl) {
-        // This calls a C# method named "PlayAudio" on a GameObject named "AudioManager"
-      script.onerror = () => handleError({audioUrl});
+    document.body.appendChild(script);
+    console.log("[Loader] Script element added to DOM");
+  }
+
+  function handleAudioPlayback() {
+    const audioUrl = audioUrlInput.value;
+    if (audioUrl) {
+      console.log(`[Audio] Attempting to play: ${audioUrl}`);
+      try {
         currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
+        console.log("[Audio] Play message sent successfully");
+      } catch (e) {
+        console.error("[Audio] Error sending message:", e);
       }
+    } else {
+      console.log("[Audio] No audio URL provided");
     }
+  }
 
-    function handleError(error) {
-      console.error("Error:", error);
-      alert(`Failed to load ${currentProject} experience`);
-      returnToMainInterface();
+  function handleError(error) {
+    const errorDetails = {
+      project: currentProject,
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.stack : error,
+      userAgent: navigator.userAgent
+    };
+
+    console.error("[Error] Detailed error report:", errorDetails);
+    alert(`Failed to load ${currentProject} experience\n\nCheck console for details`);
+    returnToMainInterface();
+  }
+
+  window.addEventListener("resize", () => {
+    if (currentUnityInstance) {
+      currentUnityInstance.SetFullscreen(0);
     }
+  });
 
-    // If the browser is resized, we can force Unity to recalc. (Optional)
-    window.addEventListener("resize", () => {
-      if (currentUnityInstance) {
-        currentUnityInstance.SetFullscreen(0);
-      }
-    });
-  </script>
+  console.log("[Init] Application initialized successfully");
+  console.log("[Debug] User input available:", audioUrlInput);
+</script>
 </body>
 </html>
