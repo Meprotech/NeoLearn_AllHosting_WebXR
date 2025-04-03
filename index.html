@@ -269,17 +269,12 @@
   /* ==============================
      MAIN INTERFACE FUNCTIONS
   ============================== */
- function loadUnityProject(project) {
-  console.log(`[Load] Opening Unity WebGL for: ${project}`);
-  const buildPath = `Build/${project}/WebGL.html`; // Assuming WebGL.html is the entry point
-  
-  // Open the Unity WebGL in a new tab
-  const newTab = window.open(buildPath, '_blank');
-  if (!newTab) {
-    alert("Popup blocked! Please allow popups for this site.");
+  function loadUnityProject(project) {
+    console.log([Load] Starting load process for: ${project});
+    currentProject = project;
+    showUnityContainer();
+    initializeUnityBuild(project);
   }
-}
-
 
   function showUnityContainer() {
     console.log("[UI] Showing Unity container");
@@ -299,7 +294,7 @@
   function displayInput() {
     const displayArea = document.getElementById("displayArea");
     const value = audioUrlInput.value;
-    console.log(`[Input] Displaying audio URL: ${value || 'none'}`);
+    console.log([Input] Displaying audio URL: ${value || 'none'});
     displayArea.textContent = value
       ? "Audio Source: " + value
       : "No audio URL provided";
@@ -308,32 +303,32 @@
   /* ==============================
      UNITY LOADING FUNCTIONS
   ============================== */
-function initializeUnityBuild(project) {
-  console.log(`[Unity] Initializing build for: ${project}`);
-  const buildPath = `Build/${project}/`;
+  function initializeUnityBuild(project) {
+    console.log([Unity] Initializing build for: ${project});
+    const buildPath = Build/${project}/;
+    console.log([Path] Build path: ${buildPath});
 
-  const config = {
-    dataUrl: buildPath + "WebGL.data",
-    frameworkUrl: buildPath + "WebGL.framework.js",
-    codeUrl: buildPath + "WebGL.wasm",
-    streamingAssetsUrl: buildPath + "StreamingAssets",
-    companyName: "NeoLearn",
-    productName: project,
-    productVersion: "1.0",
-  };
+    const config = {
+      dataUrl: buildPath + "WebGL.data",
+      frameworkUrl: buildPath + "WebGL.framework.js",
+      codeUrl: buildPath + "WebGL.wasm",
+      streamingAssetsUrl: buildPath + "StreamingAssets",
+      companyName: "NeoLearn",
+      productName: project,
+      productVersion: "1.0",
+    };
 
-  console.log("[Config] Unity configuration:", config);
+    console.log("[Config] Unity configuration:", config);
 
-  const canvas = document.getElementById("unity-canvas");
-  const loadingBar = document.getElementById("unity-loading-bar");
+    const canvas = document.getElementById("unity-canvas");
+    const loadingBar = document.getElementById("unity-loading-bar");
 
-  cleanupPreviousInstance(() => {
-    console.log("[Cleanup] Previous instance cleared");
-    loadingBar.style.display = "block";
-    loadNewInstance(buildPath, config, canvas, loadingBar);
-  });
-}
-
+    cleanupPreviousInstance(() => {
+      console.log("[Cleanup] Previous instance cleared");
+      loadingBar.style.display = "block";
+      loadNewInstance(buildPath, config, canvas, loadingBar);
+    });
+  }
 
   function cleanupPreviousInstance(callback) {
     if (currentUnityInstance) {
@@ -358,7 +353,7 @@ function initializeUnityBuild(project) {
     console.log("[Loader] Starting new instance load");
     const script = document.createElement("script");
     script.src = buildPath + "WebGL.loader.js";
-    console.log(`[Loader] Loading script from: ${script.src}`);
+    console.log([Loader] Loading script from: ${script.src});
 
     script.onload = () => {
       console.log("[Loader] Script loaded successfully");
@@ -366,7 +361,7 @@ function initializeUnityBuild(project) {
         createUnityInstance(canvas, config, (progress) => {
           // Removed loading progress log here
           document.getElementById("unity-progress-bar-full").style.width =
-            `${Math.min(100 * progress, 100)}%`;
+            ${Math.min(100 * progress, 100)}%;
         })
         .then((instance) => {
           console.log("[Unity] Instance created successfully");
@@ -391,7 +386,7 @@ function initializeUnityBuild(project) {
         error: error.message
       });
       handleError({
-        message: `Failed to load ${currentProject} loader script`,
+        message: Failed to load ${currentProject} loader script,
         details: error
       });
     };
@@ -401,20 +396,19 @@ function initializeUnityBuild(project) {
   }
 
   function handleAudioPlayback() {
-  const audioUrl = audioUrlInput.value;
-  if (audioUrl) {
-    console.log(`[Audio] Attempting to play: ${audioUrl}`);
-    try {
-      currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
-      console.log("[Audio] Play message sent successfully");
-    } catch (e) {
-      console.error("[Audio] Error sending message:", e);
+    const audioUrl = audioUrlInput.value;
+    if (audioUrl) {
+      console.log([Audio] Attempting to play: ${audioUrl});
+      try {
+        currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
+        console.log("[Audio] Play message sent successfully");
+      } catch (e) {
+        console.error("[Audio] Error sending message:", e);
+      }
+    } else {
+      console.log("[Audio] No audio URL provided");
     }
-  } else {
-    console.log("[Audio] No audio URL provided");
   }
-}
-
 
   function handleError(error) {
     const errorDetails = {
@@ -425,7 +419,7 @@ function initializeUnityBuild(project) {
     };
 
     console.error("[Error] Detailed error report:", errorDetails);
-    alert(`Failed to load ${currentProject} experience\n\nCheck console for details`);
+    alert(Failed to load ${currentProject} experience\n\nCheck console for details);
     returnToMainInterface();
   }
 
