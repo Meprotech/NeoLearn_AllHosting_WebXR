@@ -270,7 +270,7 @@
      MAIN INTERFACE FUNCTIONS
   ============================== */
   function loadUnityProject(project) {
-    console.log([Load] Starting load process for: ${project});
+    console.log(`[Load] Starting load process for: ${project}`);
     currentProject = project;
     showUnityContainer();
     initializeUnityBuild(project);
@@ -294,7 +294,7 @@
   function displayInput() {
     const displayArea = document.getElementById("displayArea");
     const value = audioUrlInput.value;
-    console.log([Input] Displaying audio URL: ${value || 'none'});
+    console.log(`[Input] Displaying audio URL: ${value || 'none'}`);
     displayArea.textContent = value
       ? "Audio Source: " + value
       : "No audio URL provided";
@@ -304,9 +304,9 @@
      UNITY LOADING FUNCTIONS
   ============================== */
   function initializeUnityBuild(project) {
-    console.log([Unity] Initializing build for: ${project});
-    const buildPath = Build/${project}/;
-    console.log([Path] Build path: ${buildPath});
+    console.log(`[Unity] Initializing build for: ${project}`);
+    const buildPath = `Build/${project}/`;
+    console.log(`[Path] Build path: ${buildPath}`);
 
     const config = {
       dataUrl: buildPath + "WebGL.data",
@@ -353,7 +353,7 @@
     console.log("[Loader] Starting new instance load");
     const script = document.createElement("script");
     script.src = buildPath + "WebGL.loader.js";
-    console.log([Loader] Loading script from: ${script.src});
+    console.log(`[Loader] Loading script from: ${script.src}`);
 
     script.onload = () => {
       console.log("[Loader] Script loaded successfully");
@@ -361,7 +361,7 @@
         createUnityInstance(canvas, config, (progress) => {
           // Removed loading progress log here
           document.getElementById("unity-progress-bar-full").style.width =
-            ${Math.min(100 * progress, 100)}%;
+            `${Math.min(100 * progress, 100)}%`;
         })
         .then((instance) => {
           console.log("[Unity] Instance created successfully");
@@ -386,7 +386,7 @@
         error: error.message
       });
       handleError({
-        message: Failed to load ${currentProject} loader script,
+        message: `Failed to load ${currentProject} loader script`,
         details: error
       });
     };
@@ -398,7 +398,7 @@
   function handleAudioPlayback() {
     const audioUrl = audioUrlInput.value;
     if (audioUrl) {
-      console.log([Audio] Attempting to play: ${audioUrl});
+      console.log(`[Audio] Attempting to play: ${audioUrl}`);
       try {
         currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
         console.log("[Audio] Play message sent successfully");
@@ -419,7 +419,7 @@
     };
 
     console.error("[Error] Detailed error report:", errorDetails);
-    alert(Failed to load ${currentProject} experience\n\nCheck console for details);
+    alert(`Failed to load ${currentProject} experience\n\nCheck console for details`);
     returnToMainInterface();
   }
 
