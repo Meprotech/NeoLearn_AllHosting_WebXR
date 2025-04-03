@@ -4,8 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NeoLearn Experience</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Include Montserrat font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap"
+    rel="stylesheet"
+  />
+
   <style>
+    /* ====== Basic Page Styles ====== */
     body {
       display: flex;
       flex-direction: column;
@@ -15,24 +22,48 @@
       background: linear-gradient(135deg, #f0f8ff, #e0f2fe);
       font-family: 'Montserrat', sans-serif;
       color: #333;
+      line-height: 1.6;
     }
+
+    /* Main interface container (menu) */
     .main-interface {
       width: 100%;
       max-width: 1200px;
       padding: 20px;
     }
+
+    /* Header logo styling */
     .header-logo {
       width: 100%;
       max-height: 250px;
       object-fit: cover;
       display: block;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid #ddd;
       margin-bottom: 20px;
     }
+
+    /* Branding (title & subtitle) */
     .branding {
       text-align: center;
       max-width: 800px;
       margin: 0 auto 40px auto;
     }
+    .branding h1 {
+      color: #2e8b57;
+      font-size: 2.8em;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+      font-weight: 700;
+    }
+    .branding p {
+      font-size: 1.1em;
+      color: #555;
+      margin-bottom: 30px;
+      font-weight: 300;
+    }
+
+    /* Container for left & right sections */
     .main-container {
       display: flex;
       width: 90%;
@@ -43,40 +74,71 @@
       overflow: hidden;
       margin: 0 auto;
     }
-    .left-section, .right-section {
+    .left-section,
+    .right-section {
       flex: 1;
       padding: 30px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
+    .separator {
+      width: 2px;
+      background-color: #eee;
+      height: 100%;
+    }
+
+    /* Buttons for loading scenes, returning, etc. */
     .scene-button {
       padding: 16px 30px;
       font-size: 16px;
+      border: none;
       border-radius: 8px;
       background: linear-gradient(135deg, #63a4ff, #007bff);
       color: white;
       cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
       font-weight: 600;
       margin: 10px 0;
     }
+    .scene-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+    }
+    .scene-button:active,
+    .scene-button.selected {
+      transform: scale(1.02);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Input field styling */
     .input-field {
-      padding: 14px;
+      padding: 14px 25px;
       font-size: 16px;
+      border: 1px solid #ddd;
       border-radius: 8px;
       width: 80%;
+      box-sizing: border-box;
       margin-bottom: 15px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
     }
+
+    /* Display area for showing the typed URL */
     #displayArea {
       margin-top: 15px;
       font-size: 1.1em;
       color: #444;
+      text-align: center;
       background-color: #f9f9f9;
       padding: 12px;
       border-radius: 6px;
-      text-align: center;
       min-width: 80%;
+      word-wrap: break-word;
     }
+
+    /* ====== Unity Container Styles ====== */
     #unity-container {
       position: fixed;
       top: 0;
@@ -85,127 +147,158 @@
       height: 100%;
       background: white;
       z-index: 1000;
-      display: none;
+      display: none; /* Hidden by default; shown when user picks a scene */
     }
-    #return-button {
-      position: absolute;
-      top: 20px;
-      left: 20px;
+    #unity-canvas-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
     }
-  </style>
-</head>
-<body>
-  <div class="main-interface">
-    <img src="logo.png" alt="NeoLearn Logo" class="header-logo" />
-    <div class="branding">
-      <h1>NeoLearn Experience</h1>
-      <p>Explore immersive learning environments with NeoLearn.</p>
-    </div>
-    <div class="main-container">
-      <div class="left-section">
-        <button id="btnSpace" class="scene-button">Space</button>
-        <button id="btnHeart" class="scene-button">Heart</button>
-      </div>
-      <div class="right-section">
-        <input type="text" id="userInput" class="input-field" placeholder="Enter audio URL" />
-        <button id="previewButton" class="scene-button">Preview URL</button>
-        <div id="displayArea"></div>
-      </div>
-    </div>
-  </div>
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      background: #222; /* Fallback background */
+    }
 
-  <div id="unity-container">
-    <canvas id="unity-canvas"></canvas>
-    <button id="return-button" class="scene-button">Return to Menu</button>
+    /* Loading bar for Unity */
+    #unity-loading-bar {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    #unity-logo {
+      margin-bottom: 10px;
+      /* If you have a custom logo, place it here */
+    }
+    #unity-progress-bar-empty {
+      width: 250px;
+@ -259,132 +258,179 @@
+    </button>
   </div>
 
   <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("btnSpace").addEventListener("click", () => loadUnityProject("Space"));
-      document.getElementById("btnHeart").addEventListener("click", () => loadUnityProject("Heart"));
-      document.getElementById("previewButton").addEventListener("click", displayInput);
-      document.getElementById("return-button").addEventListener("click", returnToMainInterface);
-    });
+    /* ==============================
+       GLOBAL VARIABLES
+    ============================== */
+    let currentUnityInstance = null; // holds the active Unity instance
+    let currentProject = "";         // which project is currently loaded
+    const audioUrlInput = document.getElementById("userInput");
 
-    let currentUnityInstance = null;
-    let currentProject = "";
-
-    window.loadUnityProject = function (project) {
-      console.log(`[Load] Loading Unity project: ${project}`);
+    /* ==============================
+       MAIN INTERFACE FUNCTIONS
+    ============================== */
+    function loadUnityProject(project) {
       currentProject = project;
+      showUnityContainer();
+      initializeUnityBuild(project);
+    }
+
+    function showUnityContainer() {
+      // Show the Unity container, hide the main menu
       document.getElementById("unity-container").style.display = "block";
       document.querySelector(".main-interface").style.display = "none";
-      initializeUnityBuild(project);
-    };
+    }
 
-    window.returnToMainInterface = function () {
-      console.log("[UI] Returning to main interface");
-      document.getElementById("unity-container").style.display = "none";
-      document.querySelector(".main-interface").style.display = "block";
-    };
+    function returnToMainInterface() {
+      // Unload Unity, then return to main menu
+      cleanupPreviousInstance(() => {
+        document.getElementById("unity-container").style.display = "none";
+        document.querySelector(".main-interface").style.display = "block";
+        document.getElementById("unity-progress-bar-full").style.width = "0%";
+      });
+    }
 
-    window.displayInput = function () {
-      const inputField = document.getElementById("userInput");
+    function displayInput() {
       const displayArea = document.getElementById("displayArea");
-      const value = inputField.value.trim();
-      displayArea.textContent = value ? `Audio Source: ${value}` : "No audio URL provided";
-    };
+      const value = audioUrlInput.value;
+      displayArea.textContent = value
+        ? "Audio Source: " + value
+        : "No audio URL provided";
+    }
 
+    /* ==============================
+       UNITY LOADING FUNCTIONS
+    ============================== */
     function initializeUnityBuild(project) {
-      console.log(`[Unity] Initializing build for: ${project}`);
+      // Paths for the selected project
       const buildPath = `Build/${project}/`;
+
+      // Basic config for createUnityInstance
       const config = {
         dataUrl: buildPath + "WebGL.data",
         frameworkUrl: buildPath + "WebGL.framework.js",
         codeUrl: buildPath + "WebGL.wasm",
+        streamingAssetsUrl: buildPath + "StreamingAssets",
         companyName: "NeoLearn",
         productName: project,
         productVersion: "1.0",
       };
 
-      document.getElementById("unity-container").innerHTML = '<canvas id="unity-canvas"></canvas>';
+      // Get references to HTML elements
       const canvas = document.getElementById("unity-canvas");
+      const loadingBar = document.getElementById("unity-loading-bar");
 
-      const script = document.createElement("script");
-      script.src = buildPath + "WebGL.loader.js?v=" + Date.now();
-      script.onload = () => {
-        console.log("[Loader] Script loaded");
-        createUnityInstance(canvas, config, (progress) => {
-          console.log(`[Loader] Progress: ${Math.round(progress * 100)}%`);
-        })
-        .then((instance) => {
-          console.log("[Unity] Instance created");
-          currentUnityInstance = instance;
-          handleAudioPlayback();
-        })
-        .catch((error) => {
-          console.error("[Unity] Failed to create instance:", error);
-          alert("Failed to load Unity experience.");
-          returnToMainInterface();
+      // First clean up any existing instance, then load the new one
+      cleanupPreviousInstance(() => {
+        loadingBar.style.display = "block";
+        loadNewInstance(buildPath, config, canvas, loadingBar);
+      });
+    }
+
+    function cleanupPreviousInstance(callback) {
+      if (currentUnityInstance) {
+        currentUnityInstance.Quit().then(() => {
+          currentUnityInstance = null;
+          callback();
         });
+      } else {
+        callback();
+      }
+    }
+
+    function loadNewInstance(buildPath, config, canvas, loadingBar) {
+      // Dynamically load the Unity loader script
+      const script = document.createElement("script");
+      script.src = buildPath + "WebGL.loader.js";
+
+      script.onload = () => {
+        // createUnityInstance is provided by the loader script
+        createUnityInstance(canvas, config, (progress) => {
+          document.getElementById("unity-progress-bar-full").style.width =
+            `${Math.min(100 * progress, 100)}%`;
+        })
+          .then((instance) => {
+            currentUnityInstance = instance;
+            loadingBar.style.display = "none";
+            handleAudioPlayback();
+          })
+          .catch((error) => {
+            handleError(error);
+          });
       };
-      script.onerror = () => {
-        console.error("[Loader] Failed to load script:", script.src);
-        alert("Failed to load Unity project.");
-        returnToMainInterface();
-      };
+
+      script.onerror = () => handleError(`Failed to load ${currentProject} loader`);
       document.body.appendChild(script);
     }
 
     function handleAudioPlayback() {
-      const audioUrl = document.getElementById("userInput").value;
+      const audioUrl = audioUrlInput.value;
       if (audioUrl) {
-        console.log(`[Audio] Playing: ${audioUrl}`);
-        try {
-          currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
-        } catch (error) {
-          console.error("[Audio] Error:", error);
-        }
-      } else {
-        console.log("[Audio] No audio URL provided");
+        // This calls a C# method named "PlayAudio" on a GameObject named "AudioManager"
+      script.onerror = () => handleError({audioUrl});
+        currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
       }
     }
 
+    function handleError(error) {
+      console.error("Error:", error);
+      alert(`Failed to load ${currentProject} experience`);
+      returnToMainInterface();
+    }
+
+    // If the browser is resized, we can force Unity to recalc. (Optional)
     window.addEventListener("resize", () => {
       if (currentUnityInstance) {
         currentUnityInstance.SetFullscreen(0);
