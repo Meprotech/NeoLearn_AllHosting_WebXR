@@ -270,10 +270,14 @@
      MAIN INTERFACE FUNCTIONS
   ============================== */
   function loadUnityProject(project) {
-    console.log(`[Load] Starting load process for: ${project}`);
-    currentProject = project;
-    showUnityContainer();
-    initializeUnityBuild(project);
+    console.log(`[Load] Opening Unity WebGL for: ${project}`);
+    const buildPath = `Build/${project}/WebGL.html`; // Assuming WebGL.html is the entry point
+    
+    // Open the Unity WebGL in a new tab
+    const newTab = window.open(buildPath, '_blank');
+    if (!newTab) {
+      alert("Popup blocked! Please allow popups for this site.");
+    }
   }
 
   function showUnityContainer() {
