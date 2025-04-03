@@ -269,16 +269,17 @@
   /* ==============================
      MAIN INTERFACE FUNCTIONS
   ============================== */
-  function loadUnityProject(project) {
-    console.log(`[Load] Opening Unity WebGL for: ${project}`);
-    const buildPath = `Build/${project}/WebGL.html`; // Assuming WebGL.html is the entry point
-    
-    // Open the Unity WebGL in a new tab
-    const newTab = window.open(buildPath, '_blank');
-    if (!newTab) {
-      alert("Popup blocked! Please allow popups for this site.");
-    }
+ function loadUnityProject(project) {
+  console.log(`[Load] Opening Unity WebGL for: ${project}`);
+  const buildPath = `Build/${project}/WebGL.html`; // Assuming WebGL.html is the entry point
+  
+  // Open the Unity WebGL in a new tab
+  const newTab = window.open(buildPath, '_blank');
+  if (!newTab) {
+    alert("Popup blocked! Please allow popups for this site.");
   }
+}
+
 
   function showUnityContainer() {
     console.log("[UI] Showing Unity container");
@@ -307,32 +308,32 @@
   /* ==============================
      UNITY LOADING FUNCTIONS
   ============================== */
-  function initializeUnityBuild(project) {
-    console.log(`[Unity] Initializing build for: ${project}`);
-    const buildPath = `Build/${project}/`;
-    console.log(`[Path] Build path: ${buildPath}`);
+function initializeUnityBuild(project) {
+  console.log(`[Unity] Initializing build for: ${project}`);
+  const buildPath = `Build/${project}/`;
 
-    const config = {
-      dataUrl: buildPath + "WebGL.data",
-      frameworkUrl: buildPath + "WebGL.framework.js",
-      codeUrl: buildPath + "WebGL.wasm",
-      streamingAssetsUrl: buildPath + "StreamingAssets",
-      companyName: "NeoLearn",
-      productName: project,
-      productVersion: "1.0",
-    };
+  const config = {
+    dataUrl: buildPath + "WebGL.data",
+    frameworkUrl: buildPath + "WebGL.framework.js",
+    codeUrl: buildPath + "WebGL.wasm",
+    streamingAssetsUrl: buildPath + "StreamingAssets",
+    companyName: "NeoLearn",
+    productName: project,
+    productVersion: "1.0",
+  };
 
-    console.log("[Config] Unity configuration:", config);
+  console.log("[Config] Unity configuration:", config);
 
-    const canvas = document.getElementById("unity-canvas");
-    const loadingBar = document.getElementById("unity-loading-bar");
+  const canvas = document.getElementById("unity-canvas");
+  const loadingBar = document.getElementById("unity-loading-bar");
 
-    cleanupPreviousInstance(() => {
-      console.log("[Cleanup] Previous instance cleared");
-      loadingBar.style.display = "block";
-      loadNewInstance(buildPath, config, canvas, loadingBar);
-    });
-  }
+  cleanupPreviousInstance(() => {
+    console.log("[Cleanup] Previous instance cleared");
+    loadingBar.style.display = "block";
+    loadNewInstance(buildPath, config, canvas, loadingBar);
+  });
+}
+
 
   function cleanupPreviousInstance(callback) {
     if (currentUnityInstance) {
@@ -400,19 +401,20 @@
   }
 
   function handleAudioPlayback() {
-    const audioUrl = audioUrlInput.value;
-    if (audioUrl) {
-      console.log(`[Audio] Attempting to play: ${audioUrl}`);
-      try {
-        currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
-        console.log("[Audio] Play message sent successfully");
-      } catch (e) {
-        console.error("[Audio] Error sending message:", e);
-      }
-    } else {
-      console.log("[Audio] No audio URL provided");
+  const audioUrl = audioUrlInput.value;
+  if (audioUrl) {
+    console.log(`[Audio] Attempting to play: ${audioUrl}`);
+    try {
+      currentUnityInstance.SendMessage("AudioManager", "PlayAudio", audioUrl);
+      console.log("[Audio] Play message sent successfully");
+    } catch (e) {
+      console.error("[Audio] Error sending message:", e);
     }
+  } else {
+    console.log("[Audio] No audio URL provided");
   }
+}
+
 
   function handleError(error) {
     const errorDetails = {
