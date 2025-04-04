@@ -465,6 +465,20 @@
     // Log that the application has initialized.
     console.log("[Init] Application initialized successfully");
     console.log("[Debug] User input available:", audioUrlInput);
+
+ function ExitWebXR() {
+    console.log("[Exit] Closing WebXR experience...");
+    
+    // Redirect to another page or show the menu
+    document.getElementById("unity-container").style.display = "none";
+    document.querySelector(".main-interface").style.display = "block";
+
+    // Optional: Reload the page to reset Unity state
+    setTimeout(() => {
+      location.reload();
+    }, 500);
+  }
+    
   </script>
 </body>
 </html>
