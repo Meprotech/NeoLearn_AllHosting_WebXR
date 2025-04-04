@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>NeoLearn Experience</title>
   <!-- Include Montserrat font from Google Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
     /* ====== Basic Page Styles ====== */
     body {
@@ -188,6 +185,33 @@
       left: 20px;
       z-index: 1100;
     }
+    /* VR Button styling inside Unity container */
+    #enterVR {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+      padding: 16px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ff7f50, #ff4500);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 10px rgba(255, 69, 0, 0.3);
+      font-weight: 600;
+      margin: 10px 0;
+    }
+    #enterVR:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+    }
+    #enterVR:active,
+    #enterVR.selected {
+      transform: scale(1.02);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -242,9 +266,13 @@
         <div id="unity-progress-bar-full"></div>
       </div>
     </div>
-    <!-- Button to return to the main menu -->
+    <!-- Return Button to go back to the main menu -->
     <button id="return-button" class="scene-button" onclick="returnToMainInterface()">
       Return to Menu
+    </button>
+    <!-- New VR Button to trigger VR mode -->
+    <button id="enterVR" class="scene-button" onclick="enterVRMode()">
+      Enter VR
     </button>
   </div>
 
@@ -466,19 +494,31 @@
     console.log("[Init] Application initialized successfully");
     console.log("[Debug] User input available:", audioUrlInput);
 
- function ExitWebXR() {
-    console.log("[Exit] Closing WebXR experience...");
-    
-    // Redirect to another page or show the menu
-    document.getElementById("unity-container").style.display = "none";
-    document.querySelector(".main-interface").style.display = "block";
+    // ----- VR Functionality -----
+    function enterVRMode() {
+      console.log("[VR] Attempting to toggle VR mode...");
+      if (currentUnityInstance && currentUnityInstance.Module && currentUnityInstance.Module.WebXR) {
+        try {
+          currentUnityInstance.Module.WebXR.toggleVR();
+          console.log("[VR] VR mode toggled successfully");
+        } catch (e) {
+          console.error("[VR] Error toggling VR mode:", e);
+        }
+      } else {
+        console.warn("[VR] VR functionality not available");
+      }
+    }
 
-    // Optional: Reload the page to reset Unity state
-    setTimeout(() => {
-      location.reload();
-    }, 500);
-  }
-    
+    // Optional: Exit WebXR mode (if needed)
+    function ExitWebXR() {
+      console.log("[Exit] Closing WebXR experience...");
+      // This function can be customized to handle exit (e.g., hide Unity container, return to main menu)
+      document.getElementById("unity-container").style.display = "none";
+      document.querySelector(".main-interface").style.display = "block";
+      setTimeout(() => {
+        location.reload();
+      }, 500);
+    }
   </script>
 </body>
 </html>
