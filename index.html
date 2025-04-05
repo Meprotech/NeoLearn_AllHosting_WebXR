@@ -202,6 +202,7 @@
       box-shadow: 0 4px 10px rgba(255, 69, 0, 0.3);
       font-weight: 600;
       margin: 10px 0;
+      display: none;
     }
     #enterVR:hover {
       transform: translateY(-3px);
@@ -509,15 +510,14 @@
       }
     }
 
-    // Optional: Exit WebXR mode (if needed)
-    function ExitWebXR() {
-      console.log("[Exit] Closing WebXR experience...");
-      // This function can be customized to handle exit (e.g., hide Unity container, return to main menu)
-      document.getElementById("unity-container").style.display = "none";
-      document.querySelector(".main-interface").style.display = "block";
-      setTimeout(() => {
-        location.reload();
-      }, 500);
+    // This function is called from Unity once audio has finished loading.
+    function OnAudioLoaded() {
+      console.log("[HTML] Audio has loaded, showing VR button");
+      const enterVRButton = document.getElementById("enterVR");
+      if (enterVRButton) {
+        enterVRButton.style.display = "block"; // Make sure VR button is visible
+        enterVRButton.disabled = false; // Enable it if it was disabled
+      }
     }
   </script>
 </body>
