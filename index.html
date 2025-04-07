@@ -526,23 +526,49 @@
       }
     });
 
-    /* ----- Full Screen Functionality ----- */
     function toggleFullscreen() {
-      const container = document.getElementById("unity-container");
-
-        // Request full screen on the entire container
-        if (container.requestFullscreen) {
-          container.requestFullscreen();
-        } else if (container.msRequestFullscreen) {
-          container.msRequestFullscreen();
-        } else if (container.mozRequestFullScreen) {
-          container.mozRequestFullScreen();
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
-        }
-        console.log("[Fullscreen] Requesting full screen mode");
-      
+  const container = document.getElementById("unity-container");
+  if (!document.fullscreenElement) {
+    // Request fullscreen on the container
+    if (container.requestFullscreen) {
+      container.requestFullscreen();
+    } else if (container.msRequestFullscreen) {
+      container.msRequestFullscreen();
+    } else if (container.mozRequestFullScreen) {
+      container.mozRequestFullScreen();
+    } else if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen();
     }
+    console.log("[Fullscreen] Requesting full screen mode");
+  } else {
+    // Exit fullscreen
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+    console.log("[Fullscreen] Exiting full screen mode");
+  }
+}
+
+// Adjust the container style on fullscreen change
+document.addEventListener("fullscreenchange", () => {
+  const container = document.getElementById("unity-container");
+  if (document.fullscreenElement) {
+    // When in fullscreen, ensure the container fills the screen.
+    container.style.width = "100%";
+    container.style.height = "100%";
+  } else {
+    // When exiting fullscreen, reset to original dimensions.
+    container.style.width = "800px";
+    container.style.height = "600px";
+  }
+});
+
 
     /* ----- VR Functionality ----- */
     function enterVRMode() {
