@@ -128,15 +128,16 @@
       word-wrap: break-word;
     }
     /* ====== Unity Container Styles ====== */
-    /* Initially, the Unity container is a small window. */
+    /* Container for the Unity WebGL build, hidden until needed */
     #unity-container {
-      width: 800px;
-      height: 600px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: white;
-      margin: 20px auto;
-      position: relative;
+      z-index: 1000;
       display: none;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
     /* Container for Unity's canvas element */
     #unity-canvas-container {
@@ -212,28 +213,6 @@
       transform: scale(1.02);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
-    /* Full screen button styling inside Unity container.
-       It is positioned in the top right corner of the Unity container. */
-       #fullscreen-button {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      z-index: 1100;
-      padding: 8px 12px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      background: linear-gradient(135deg, #34c759, #30b158);
-      color: white;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
-    }
-
-    #fullscreen-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
     /* ====== Loading Overlay Styles ====== */
     #loadingOverlay {
       position: absolute;
@@ -301,7 +280,7 @@
     </div>
   </div>
 
-  <!-- Unity Container: Initially a small window; displays when a build is loaded -->
+  <!-- Unity Container: Hidden by default; displays when a build is loaded -->
   <div id="unity-container">
     <div id="unity-canvas-container">
       <!-- The Unity canvas will be inserted here -->
@@ -328,13 +307,14 @@
     <button id="enterVR" class="scene-button" onclick="enterVRMode()">
       Enter VR
     </button>
-    <!-- Full Screen Button -->
-    <button id="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
   </div>
 
   <script>
     /* ==============================
        GLOBAL VARIABLES
+       - currentUnityInstance: Holds the current Unity WebGL instance.
+       - currentProject: Tracks the current project being loaded.
+       - audioUrlInput: Reference to the audio URL input field.
     ============================== */
     let currentUnityInstance = null;
     let currentProject = "";
@@ -345,6 +325,7 @@
     ============================== */
 
     // Called when a scene button is clicked.
+    // Sets the current project, shows the Unity container, and starts Unity build initialization.
     function loadUnityProject(project) {
       console.log(`[Load] Starting load process for: ${project}`);
       currentProject = project;
@@ -362,8 +343,10 @@
     }
 
     // Called when the "Return to Menu" button is clicked.
+    // Cleans up the current Unity instance, removes the Unity canvas, and shows the main interface.
     function returnToMainInterface() {
       console.log("[UI] Returning to main interface");
+
       cleanupPreviousInstance(() => {
         document.getElementById("unity-container").style.display = "none";
         document.querySelector(".main-interface").style.display = "block";
@@ -403,14 +386,15 @@
       console.log(`[Path] Build path: ${buildPath}`);
 
       const config = {
-        dataUrl: buildPath + "WebGL.data",
-        frameworkUrl: buildPath + "WebGL.framework.js",
-        codeUrl: buildPath + "WebGL.wasm",
-        streamingAssetsUrl: buildPath + "StreamingAssets",
-        companyName: "NeoLearn",
-        productName: project,
-        productVersion: "1.0",
-      };
+            dataUrl: buildPath + "WebGL.data",
+            frameworkUrl: buildPath + "WebGL.framework.js",
+            codeUrl: buildPath + "WebGL.wasm",
+            streamingAssetsUrl: buildPath + "StreamingAssets",
+            companyName: "NeoLearn",
+            productName: project,
+            productVersion: "1.0",
+          };
+
 
       console.log("[Config] Unity configuration:", config);
 
@@ -445,6 +429,7 @@
 
     function loadNewInstance(buildPath, config, canvas, loadingBar) {
       console.log("[Loader] Starting new instance load");
+
       const script = document.createElement("script");
       script.src = buildPath + "WebGL.loader.js";
       console.log(`[Loader] Loading script from: ${script.src}`);
@@ -520,41 +505,13 @@
     }
 
     window.addEventListener("resize", () => {
-      // If in fullscreen, the container automatically adapts.
       if (currentUnityInstance) {
         currentUnityInstance.SetFullscreen(0);
       }
     });
 
-    /* ----- Full Screen Functionality ----- */
-    function toggleFullscreen() {
-      const container = document.getElementById("unity-container");
-      if (!document.fullscreenElement) {
-        // Request full screen on the entire container
-        if (container.requestFullscreen) {
-          container.requestFullscreen();
-        } else if (container.msRequestFullscreen) {
-          container.msRequestFullscreen();
-        } else if (container.mozRequestFullScreen) {
-          container.mozRequestFullScreen();
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
-        }
-        console.log("[Fullscreen] Requesting full screen mode");
-      } else {
-        // Exit full screen
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-        console.log("[Fullscreen] Exiting full screen mode");
-      }
-    }
+    console.log("[Init] Application initialized successfully");
+    console.log("[Debug] User input available:", audioUrlInput);
 
     /* ----- VR Functionality ----- */
     function enterVRMode() {
@@ -571,22 +528,21 @@
       }
     }
 
-    // Called from Unity once audio has finished loading.
+    // This function is called from Unity once audio has finished loading.
     function OnAudioLoaded() {
       console.log("[HTML] Audio has loaded, hiding loading overlay and showing VR button");
+      // Hide the loading overlay
       const overlay = document.getElementById("loadingOverlay");
       if (overlay) {
         overlay.style.display = "none";
       }
+      // Show the VR button
       const enterVRButton = document.getElementById("enterVR");
       if (enterVRButton) {
         enterVRButton.style.display = "block";
         enterVRButton.disabled = false;
       }
     }
-
-    console.log("[Init] Application initialized successfully");
-    console.log("[Debug] User input available:", audioUrlInput);
   </script>
 </body>
-</html>
+</html>        
