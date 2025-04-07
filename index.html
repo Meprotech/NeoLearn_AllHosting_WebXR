@@ -529,7 +529,7 @@
     /* ----- Full Screen Functionality ----- */
     function toggleFullscreen() {
       const container = document.getElementById("unity-container");
-      if (!document.fullscreenElement) {
+
         // Request full screen on the entire container
         if (container.requestFullscreen) {
           container.requestFullscreen();
@@ -541,19 +541,7 @@
           container.webkitRequestFullscreen();
         }
         console.log("[Fullscreen] Requesting full screen mode");
-      } else {
-        // Exit full screen
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-        console.log("[Fullscreen] Exiting full screen mode");
-      }
+      
     }
 
     /* ----- VR Functionality ----- */
