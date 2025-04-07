@@ -213,6 +213,26 @@
       transform: scale(1.02);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
+    /* Full screen button styling inside Unity container */
+    #fullscreen-button {
+      position: absolute;
+      top: 20px;
+      right: 100px;
+      z-index: 1100;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #34c759, #30b158);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
+    }
+    #fullscreen-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
     /* ====== Loading Overlay Styles ====== */
     #loadingOverlay {
       position: absolute;
@@ -307,6 +327,8 @@
     <button id="enterVR" class="scene-button" onclick="enterVRMode()">
       Enter VR
     </button>
+    <!-- Full Screen Button -->
+    <button id="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
   </div>
 
   <script>
@@ -325,7 +347,6 @@
     ============================== */
 
     // Called when a scene button is clicked.
-    // Sets the current project, shows the Unity container, and starts Unity build initialization.
     function loadUnityProject(project) {
       console.log(`[Load] Starting load process for: ${project}`);
       currentProject = project;
@@ -343,10 +364,8 @@
     }
 
     // Called when the "Return to Menu" button is clicked.
-    // Cleans up the current Unity instance, removes the Unity canvas, and shows the main interface.
     function returnToMainInterface() {
       console.log("[UI] Returning to main interface");
-
       cleanupPreviousInstance(() => {
         document.getElementById("unity-container").style.display = "none";
         document.querySelector(".main-interface").style.display = "block";
@@ -386,15 +405,14 @@
       console.log(`[Path] Build path: ${buildPath}`);
 
       const config = {
-            dataUrl: buildPath + "WebGL.data",
-            frameworkUrl: buildPath + "WebGL.framework.js",
-            codeUrl: buildPath + "WebGL.wasm",
-            streamingAssetsUrl: buildPath + "StreamingAssets",
-            companyName: "NeoLearn",
-            productName: project,
-            productVersion: "1.0",
-          };
-
+        dataUrl: buildPath + "WebGL.data",
+        frameworkUrl: buildPath + "WebGL.framework.js",
+        codeUrl: buildPath + "WebGL.wasm",
+        streamingAssetsUrl: buildPath + "StreamingAssets",
+        companyName: "NeoLearn",
+        productName: project,
+        productVersion: "1.0",
+      };
 
       console.log("[Config] Unity configuration:", config);
 
@@ -429,7 +447,6 @@
 
     function loadNewInstance(buildPath, config, canvas, loadingBar) {
       console.log("[Loader] Starting new instance load");
-
       const script = document.createElement("script");
       script.src = buildPath + "WebGL.loader.js";
       console.log(`[Loader] Loading script from: ${script.src}`);
@@ -510,8 +527,33 @@
       }
     });
 
-    console.log("[Init] Application initialized successfully");
-    console.log("[Debug] User input available:", audioUrlInput);
+    /* ----- Full Screen Functionality ----- */
+    function toggleFullscreen() {
+      const canvas = document.getElementById("unity-canvas");
+      if (!document.fullscreenElement) {
+        if (canvas.requestFullscreen) {
+          canvas.requestFullscreen();
+        } else if (canvas.msRequestFullscreen) {
+          canvas.msRequestFullscreen();
+        } else if (canvas.mozRequestFullScreen) {
+          canvas.mozRequestFullScreen();
+        } else if (canvas.webkitRequestFullscreen) {
+          canvas.webkitRequestFullscreen();
+        }
+        console.log("[Fullscreen] Requesting full screen mode");
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        console.log("[Fullscreen] Exiting full screen mode");
+      }
+    }
 
     /* ----- VR Functionality ----- */
     function enterVRMode() {
@@ -528,21 +570,22 @@
       }
     }
 
-    // This function is called from Unity once audio has finished loading.
+    // Called from Unity once audio has finished loading.
     function OnAudioLoaded() {
       console.log("[HTML] Audio has loaded, hiding loading overlay and showing VR button");
-      // Hide the loading overlay
       const overlay = document.getElementById("loadingOverlay");
       if (overlay) {
         overlay.style.display = "none";
       }
-      // Show the VR button
       const enterVRButton = document.getElementById("enterVR");
       if (enterVRButton) {
         enterVRButton.style.display = "block";
         enterVRButton.disabled = false;
       }
     }
+
+    console.log("[Init] Application initialized successfully");
+    console.log("[Debug] User input available:", audioUrlInput);
   </script>
 </body>
 </html>
