@@ -309,7 +309,7 @@
     <button id="return-button" class="scene-button" onclick="returnToMainInterface()">Return to Menu</button>
     <button id="enterVR" class="scene-button" onclick="enterVRMode()">Enter VR</button>
     <!-- Full Screen Button -->
-    <button id="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
+        <button id="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
   </div>
 
   <script>
@@ -480,41 +480,21 @@
     }
 
     /* ----- Fullscreen Functionality ----- */
+    // Toggle fullscreen mode using Unity’s built-in method
     function toggleFullscreen() {
-      const container = document.getElementById("unity-container");
-      if (!document.fullscreenElement) {
-        if (container.requestFullscreen) {
-          container.requestFullscreen();
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
-        } else if (container.msRequestFullscreen) {
-          container.msRequestFullscreen();
+      if (currentUnityInstance) {
+        // Check if currently in fullscreen by using the browser's fullscreen element
+        var isFullScreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        if (!isFullScreen) {
+          // Enable fullscreen via Unity instance
+          currentUnityInstance.SetFullscreen(1);
+        } else {
+          // Disable fullscreen via Unity instance
+          currentUnityInstance.SetFullscreen(0);
         }
-        console.log("[Fullscreen] Requesting full screen mode");
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-        console.log("[Fullscreen] Exiting full screen mode");
       }
     }
-
-    document.addEventListener("fullscreenchange", () => {
-      const container = document.getElementById("unity-container");
-      if (document.fullscreenElement) {
-        container.style.width = "100%";
-        container.style.height = "100%";
-      } else {
-        // Reset inline styles if needed (or keep full viewport)
-        container.style.width = "";
-        container.style.height = "";
-      }
-    });
-
+    
     /* ----- VR Functionality ----- */
     function enterVRMode() {
       console.log("[VR] Attempting to toggle VR mode...");
