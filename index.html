@@ -128,16 +128,15 @@
       word-wrap: break-word;
     }
     /* ====== Unity Container Styles ====== */
-    /* Container for the Unity WebGL build, hidden until needed */
+    /* Initially, the Unity container is a small window. */
     #unity-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      width: 800px;
+      height: 600px;
       background: white;
-      z-index: 1000;
+      margin: 20px auto;
+      position: relative;
       display: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
     /* Container for Unity's canvas element */
     #unity-canvas-container {
@@ -213,11 +212,12 @@
       transform: scale(1.02);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
-    /* Full screen button styling inside Unity container */
-    #fullscreen-button {
+    /* Full screen button styling inside Unity container.
+       It is positioned in the top right corner of the Unity container. */
+       #fullscreen-button {
       position: absolute;
-      top: 20px;
-      right: 100px;
+      bottom: 10px;
+      right: 10px;
       z-index: 1100;
       padding: 8px 12px;
       font-size: 14px;
@@ -229,6 +229,7 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
     }
+
     #fullscreen-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -300,7 +301,7 @@
     </div>
   </div>
 
-  <!-- Unity Container: Hidden by default; displays when a build is loaded -->
+  <!-- Unity Container: Initially a small window; displays when a build is loaded -->
   <div id="unity-container">
     <div id="unity-canvas-container">
       <!-- The Unity canvas will be inserted here -->
@@ -334,9 +335,6 @@
   <script>
     /* ==============================
        GLOBAL VARIABLES
-       - currentUnityInstance: Holds the current Unity WebGL instance.
-       - currentProject: Tracks the current project being loaded.
-       - audioUrlInput: Reference to the audio URL input field.
     ============================== */
     let currentUnityInstance = null;
     let currentProject = "";
@@ -522,6 +520,7 @@
     }
 
     window.addEventListener("resize", () => {
+      // If in fullscreen, the container automatically adapts.
       if (currentUnityInstance) {
         currentUnityInstance.SetFullscreen(0);
       }
@@ -529,19 +528,21 @@
 
     /* ----- Full Screen Functionality ----- */
     function toggleFullscreen() {
-      const canvas = document.getElementById("unity-canvas");
+      const container = document.getElementById("unity-container");
       if (!document.fullscreenElement) {
-        if (canvas.requestFullscreen) {
-          canvas.requestFullscreen();
-        } else if (canvas.msRequestFullscreen) {
-          canvas.msRequestFullscreen();
-        } else if (canvas.mozRequestFullScreen) {
-          canvas.mozRequestFullScreen();
-        } else if (canvas.webkitRequestFullscreen) {
-          canvas.webkitRequestFullscreen();
+        // Request full screen on the entire container
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.msRequestFullscreen) {
+          container.msRequestFullscreen();
+        } else if (container.mozRequestFullScreen) {
+          container.mozRequestFullScreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
         }
         console.log("[Fullscreen] Requesting full screen mode");
       } else {
+        // Exit full screen
         if (document.exitFullscreen) {
           document.exitFullscreen();
         } else if (document.msExitFullscreen) {
