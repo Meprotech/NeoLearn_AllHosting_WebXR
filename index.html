@@ -526,34 +526,20 @@
     });
 
     /* ----- Full Screen Functionality ----- */
-    function toggleFullscreen() {
-      const container = document.getElementById("unity-container");
-      if (!document.fullscreenElement) {
-        // Request full screen on the entire container
-        if (container.requestFullscreen) {
-          container.requestFullscreen();
-        } else if (container.msRequestFullscreen) {
-          container.msRequestFullscreen();
-        } else if (container.mozRequestFullScreen) {
-          container.mozRequestFullScreen();
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
+   // Toggle fullscreen mode using Unity’s built-in method
+      function toggleFullscreen() {
+        if (currentUnityInstance) {
+          // Check if currently in fullscreen by using the browser's fullscreen element
+          var isFullScreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+          if (!isFullScreen) {
+            // Enable fullscreen via Unity instance
+            currentUnityInstance.SetFullscreen(1);
+          } else {
+            // Disable fullscreen via Unity instance
+            currentUnityInstance.SetFullscreen(0);
+          }
         }
-        console.log("[Fullscreen] Requesting full screen mode");
-      } else {
-        // Exit full screen
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-        console.log("[Fullscreen] Exiting full screen mode");
       }
-    }
 
     /* ----- VR Functionality ----- */
     function enterVRMode() {
