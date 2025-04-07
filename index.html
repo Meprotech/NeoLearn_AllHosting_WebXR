@@ -223,8 +223,6 @@
       background: black;
       z-index: 1200;
       display: block; /* Visible by default when Unity project loads */
-      opacity: 1;
-      transition: opacity 0.5s ease; /* Fade-out transition */
     }
     #overlay-loading-bar-container {
       position: absolute;
@@ -250,21 +248,33 @@
     <div class="branding">
       <h1>NeoLearn Experience</h1>
       <p>
-        Explore immersive learning environments and discover new ways to grow your knowledge with NeoLearn.
-        We are dedicated to providing engaging educational experiences.
+        Explore immersive learning environments and discover new ways to grow
+        your knowledge with NeoLearn. We are dedicated to providing engaging
+        educational experiences.
       </p>
     </div>
     <div class="main-container">
       <!-- Left Section: Buttons to launch Unity WebGL builds -->
       <div class="left-section">
-        <button class="scene-button" onclick="loadUnityProject('Space')">Space</button>
-        <button class="scene-button" onclick="loadUnityProject('Heart')">Heart</button>
+        <button class="scene-button" onclick="loadUnityProject('Space')">
+          Space
+        </button>
+        <button class="scene-button" onclick="loadUnityProject('Heart')">
+          Heart
+        </button>
       </div>
       <div class="separator"></div>
       <!-- Right Section: Audio URL input and preview button -->
       <div class="right-section">
-        <input type="text" id="userInput" class="input-field" placeholder="Enter audio URL here" />
-        <button class="scene-button" onclick="displayInput()">Preview URL</button>
+        <input
+          type="text"
+          id="userInput"
+          class="input-field"
+          placeholder="Enter audio URL here"
+        />
+        <button class="scene-button" onclick="displayInput()">
+          Preview URL
+        </button>
         <div id="displayArea"></div>
       </div>
     </div>
@@ -290,9 +300,13 @@
       </div>
     </div>
     <!-- Return Button to go back to the main menu -->
-    <button id="return-button" class="scene-button" onclick="returnToMainInterface()">Return to Menu</button>
+    <button id="return-button" class="scene-button" onclick="returnToMainInterface()">
+      Return to Menu
+    </button>
     <!-- VR Button to trigger VR mode -->
-    <button id="enterVR" class="scene-button" onclick="enterVRMode()">Enter VR</button>
+    <button id="enterVR" class="scene-button" onclick="enterVRMode()">
+      Enter VR
+    </button>
   </div>
 
   <script>
@@ -310,6 +324,8 @@
        MAIN INTERFACE FUNCTIONS
     ============================== */
 
+    // Called when a scene button is clicked.
+    // Sets the current project, shows the Unity container, and starts Unity build initialization.
     function loadUnityProject(project) {
       console.log(`[Load] Starting load process for: ${project}`);
       currentProject = project;
@@ -317,26 +333,31 @@
       initializeUnityBuild(project);
     }
 
+    // Hides the main interface and shows the Unity container.
     function showUnityContainer() {
       console.log("[UI] Showing Unity container");
       document.getElementById("unity-container").style.display = "block";
       document.querySelector(".main-interface").style.display = "none";
       // Show the loading overlay until audio loads.
       document.getElementById("loadingOverlay").style.display = "block";
-      document.getElementById("loadingOverlay").style.opacity = "1";
     }
 
+    // Called when the "Return to Menu" button is clicked.
+    // Cleans up the current Unity instance, removes the Unity canvas, and shows the main interface.
     function returnToMainInterface() {
       console.log("[UI] Returning to main interface");
+
       cleanupPreviousInstance(() => {
         document.getElementById("unity-container").style.display = "none";
         document.querySelector(".main-interface").style.display = "block";
         document.getElementById("unity-progress-bar-full").style.width = "0%";
+        // Remove the existing Unity canvas.
         const unityCanvas = document.getElementById("unity-canvas");
         if (unityCanvas) {
           unityCanvas.remove();
           console.log("[Cleanup] Unity canvas removed");
         }
+        // Create and append a new Unity canvas.
         const newCanvas = document.createElement("canvas");
         newCanvas.id = "unity-canvas";
         newCanvas.style.width = "100%";
@@ -345,11 +366,14 @@
       });
     }
 
+    // Displays the audio URL in the display area.
     function displayInput() {
       const displayArea = document.getElementById("displayArea");
       const value = audioUrlInput.value;
       console.log(`[Input] Displaying audio URL: ${value || 'none'}`);
-      displayArea.textContent = value ? "Audio Source: " + value : "No audio URL provided";
+      displayArea.textContent = value
+        ? "Audio Source: " + value
+        : "No audio URL provided";
     }
 
     /* ==============================
@@ -361,15 +385,16 @@
       const buildPath = `Build/${project}/`;
       console.log(`[Path] Build path: ${buildPath}`);
 
-      const config = {
+const config = {
         dataUrl: buildPath + "WebGL.data",
         frameworkUrl: buildPath + "WebGL.framework.js",
         codeUrl: buildPath + "WebGL.wasm",
-        streamingAssetsUrl: buildPath + "StreamingAssets",
         companyName: "NeoLearn",
         productName: project,
         productVersion: "1.0",
       };
+
+
 
       console.log("[Config] Unity configuration:", config);
 
@@ -415,6 +440,7 @@
           createUnityInstance(canvas, config, (progress) => {
             document.getElementById("unity-progress-bar-full").style.width =
               `${Math.min(100 * progress, 100)}%`;
+            // Also update the overlay loading bar:
             document.getElementById("overlay-loading-bar").style.width =
               `${Math.min(100 * progress, 100)}%`;
           })
@@ -504,15 +530,11 @@
 
     // This function is called from Unity once audio has finished loading.
     function OnAudioLoaded() {
-      console.log("[HTML] Audio has loaded, starting fade out of loading overlay and showing VR button");
-
-      // Fade out the overlay by setting its opacity to 0, then hide it after transition.
+      console.log("[HTML] Audio has loaded, hiding loading overlay and showing VR button");
+      // Hide the loading overlay
       const overlay = document.getElementById("loadingOverlay");
       if (overlay) {
-        overlay.style.opacity = "0";
-        setTimeout(() => {
-          overlay.style.display = "none";
-        }, 500); // matches the CSS transition duration
+        overlay.style.display = "none";
       }
       // Show the VR button
       const enterVRButton = document.getElementById("enterVR");
