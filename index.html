@@ -385,14 +385,16 @@
       const buildPath = `Build/${project}/`;
       console.log(`[Path] Build path: ${buildPath}`);
 
-     const config = {
+const config = {
         dataUrl: buildPath + "WebGL.data",
         frameworkUrl: buildPath + "WebGL.framework.js",
         codeUrl: buildPath + "WebGL.wasm",
+        streamingAssetsUrl: buildPath + "StreamingAssets",
         companyName: "NeoLearn",
         productName: project,
         productVersion: "1.0",
       };
+
 
       console.log("[Config] Unity configuration:", config);
 
