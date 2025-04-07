@@ -528,14 +528,46 @@
       }
     });
     
-    // Modified toggleFullscreen function
+        // Modified toggleFullscreen function
     function toggleFullscreen() {
-      if (!currentUnityInstance) return;
-      
-      // Toggle between fullscreen modes using Unity's API
-      const isFullscreen = currentUnityInstance.IsFullscreen();
-      currentUnityInstance.SetFullscreen(!isFullscreen);
+      const container = document.getElementById("unity-container");
+      if (!document.fullscreenElement) {
+        // Request fullscreen on the container element.
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) { // Safari
+          container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) { // IE11
+          container.msRequestFullscreen();
+        }
+        console.log("[Fullscreen] Requesting full screen mode");
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { // Safari
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { // IE11
+          document.msExitFullscreen();
+        }
+        console.log("[Fullscreen] Exiting full screen mode");
+      }
     }
+
+    document.addEventListener("fullscreenchange", () => {
+      const container = document.getElementById("unity-container");
+      if (document.fullscreenElement) {
+        // In fullscreen mode, make sure the container fills the screen.
+        container.style.width = "100%";
+        container.style.height = "100%";
+      } else {
+        // When exiting fullscreen, reset any inline size adjustments if needed.
+        container.style.width = "";
+        container.style.height = "";
+      }
+    });
+
+
 
     /* ----- VR Functionality ----- */
     function enterVRMode() {
