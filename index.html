@@ -213,8 +213,8 @@
       transform: scale(1.02);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     }
-    /* Full screen button styling (positioned at bottom right) */
-    #fullscreen-button {
+    
+    #unity-fullscreen-button {
       position: absolute;
       bottom: 10px;
       right: 10px;
@@ -229,10 +229,12 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
     }
-    #fullscreen-button:hover {
+    
+    #unity-fullscreen-button:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
+
     /* ====== Loading Overlay Styles ====== */
     #loadingOverlay {
       position: absolute;
@@ -309,7 +311,7 @@
     <button id="return-button" class="scene-button" onclick="returnToMainInterface()">Return to Menu</button>
     <button id="enterVR" class="scene-button" onclick="enterVRMode()">Enter VR</button>
     <!-- Full Screen Button -->
-        <button id="fullscreen-button" onclick="toggleFullscreen()">Fullscreen</button>
+        <button id="unity-fullscreen-button">Fullscreen</button>
   </div>
 
   <script>
@@ -480,20 +482,27 @@
     }
 
     /* ----- Fullscreen Functionality ----- */
-    // Toggle fullscreen mode using Unity’s built-in method
-    function toggleFullscreen() {
-      if (currentUnityInstance) {
-        // Check if currently in fullscreen by using the browser's fullscreen element
-        var isFullScreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-        if (!isFullScreen) {
-          // Enable fullscreen via Unity instance
-          currentUnityInstance.SetFullscreen(1);
-        } else {
-          // Disable fullscreen via Unity instance
-          currentUnityInstance.SetFullscreen(0);
-        }
-      }
+// Get the full screen button element
+    var fullscreenButton = document.getElementById("unity-fullscreen-button");
+    
+    if (fullscreenButton) {
+        fullscreenButton.onclick = function() {
+            // Get the canvas element rendered by Unity (usually with id "unity-canvas")
+            var canvas = document.getElementById("unity-canvas");
+            
+            // Use the Fullscreen API (with vendor prefixes for compatibility)
+            if (canvas.requestFullscreen) {
+                canvas.requestFullscreen();
+            } else if (canvas.msRequestFullscreen) {
+                canvas.msRequestFullscreen();
+            } else if (canvas.mozRequestFullScreen) {
+                canvas.mozRequestFullScreen();
+            } else if (canvas.webkitRequestFullscreen) {
+                canvas.webkitRequestFullscreen();
+            }
+        };
     }
+
     
     /* ----- VR Functionality ----- */
     function enterVRMode() {
